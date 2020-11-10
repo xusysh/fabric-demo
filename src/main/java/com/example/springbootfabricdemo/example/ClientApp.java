@@ -19,6 +19,7 @@ public class ClientApp {
 	}
 
 	public static void main(String[] args) throws Exception {
+        String userId = args[0];
 		// Load a file system based wallet for managing identities.
 		Path walletPath = Paths.get("wallet");
 		Wallet wallet = Wallet.createFileSystemWallet(walletPath);
@@ -27,7 +28,7 @@ public class ClientApp {
 		Path networkConfigPath = Paths.get("src/main/java/com/example/springbootfabricdemo/example/" + "config/connection-org1.yaml");
 
 		Gateway.Builder builder = Gateway.createBuilder();
-		builder.identity(wallet, "user1").networkConfig(networkConfigPath).discovery(true);
+		builder.identity(wallet, userId).networkConfig(networkConfigPath).discovery(true);
 
 		// create a gateway connection
 		try (Gateway gateway = builder.connect()) {

@@ -11,7 +11,8 @@ public class ClientTest {
 	@Test
 	public void testFabCar() throws Exception {
 		EnrollAdmin.main(null);
-		RegisterUser.main(null);
-		ClientApp.main(null);
+		String[] args = {"user18"};
+		RegisterUser.main(args);
+		ClientApp.main(args);
 	}
 }

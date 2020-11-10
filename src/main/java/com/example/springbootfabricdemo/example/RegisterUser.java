@@ -25,6 +25,7 @@ public class RegisterUser {
 	}
 
 	public static void main(String[] args) throws Exception {
+		String userId = args[0];
 
 		// Create a CA client for interacting with the CA.
 		Properties props = new Properties();
@@ -97,13 +98,13 @@ public class RegisterUser {
 		};
 
 		// Register the user, enroll the user, and import the new identity into the wallet.
-		RegistrationRequest registrationRequest = new RegistrationRequest("user1");
+		RegistrationRequest registrationRequest = new RegistrationRequest(userId);
 		registrationRequest.setAffiliation("org1.department1");
-		registrationRequest.setEnrollmentID("user1");
+		registrationRequest.setEnrollmentID(userId);
 		String enrollmentSecret = caClient.register(registrationRequest, admin);
-		Enrollment enrollment = caClient.enroll("user1", enrollmentSecret);
+		Enrollment enrollment = caClient.enroll(userId, enrollmentSecret);
 		Identity user = Identity.createIdentity("Org1MSP", enrollment.getCert(), enrollment.getKey());
-		wallet.put("user1", user);
+		wallet.put(userId, user);
 		System.out.println("Successfully enrolled user \"user1\" and imported it into the wallet");
 	}
 
