@@ -41,8 +41,9 @@ public class ClientApp {
 
 			result = contract.evaluateTransaction("queryAllCars");
 			System.out.println(new String(result));
+            System.out.println("---------------------------------------");
 
-			contract.submitTransaction("createCar", "CAR10", "VW", "Polo", "Grey", "Mary");
+            contract.submitTransaction("createCar", "CAR10", "VW", "Polo", "Grey", "Mary");
 
 			result = contract.evaluateTransaction("queryCar", "CAR10");
 			System.out.println(new String(result));
