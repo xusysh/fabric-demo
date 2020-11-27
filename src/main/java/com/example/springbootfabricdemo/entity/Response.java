@@ -7,16 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountInfo {
+public class Response<T> {
 
-    String id;
+    private int status;
 
-    String userName;
+    private String msg;
 
-    String password;
-
-    String privateKey;
-
-    String balance;
+    T data;
 
 }

@@ -7,16 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountInfo {
+public class TxResult {
 
-    String id;
-
-    String userName;
-
-    String password;
-
-    String privateKey;
-
-    String balance;
+    int status;
 
 }

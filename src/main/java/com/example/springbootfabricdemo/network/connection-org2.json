@@ -1,0 +1,60 @@
+{
+    "name": "network001",
+    "version": "1.0.0",
+    "client": {
+        "organization": "Org1",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "Org1": {
+            "mspid": "Org1MSP",
+            "peers": [
+                "peer0.org1.ccb.com",
+                "peer1.org1.ccb.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org1.ccb.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.org1.ccb.com": {
+            "url": "grpcs://localhost:7051",
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICRjCCAe2gAwIBAgIQQWZrrdz9KvkQH/4RY0tz0DAKBggqhkjOPQQDAjBuMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEVMBMGA1UEChMMb3JnMi5jY2IuY29tMRswGQYDVQQDExJ0bHNjYS5v\ncmcyLmNjYi5jb20wHhcNMjAxMTA5MDU0NTAwWhcNMzAxMTA3MDU0NTAwWjBuMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEVMBMGA1UEChMMb3JnMi5jY2IuY29tMRswGQYDVQQDExJ0bHNjYS5v\ncmcyLmNjYi5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQfJFRAZay2ErRX\ngveeX5Ry9Qf118K0ehy36jhFXEImZr9HdriQs8ooHliPYWP8YyXsDV+rul80gEAo\nptOgqEOio20wazAOBgNVHQ8BAf8EBAMCAaYwHQYDVR0lBBYwFAYIKwYBBQUHAwIG\nCCsGAQUFBwMBMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIIdrybwvIGyzEZK9\nSbUx0ER1GxMoe1Rhv1zd7dF+lGmWMAoGCCqGSM49BAMCA0cAMEQCIFI0WwdXYUJG\nw1FPm2ThBkC0Vd5dD14VnhMWzhDhbAmZAiAFVaPaRIYmgWM5Nh2rO5ZfuTr7HBJ2\nPqH1hasHDmdFEQ==\n-----END CERTIFICATE-----\n"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org1.ccb.com",
+                "hostnameOverride": "peer0.org1.ccb.com"
+            }
+        },
+        "peer1.org1.ccb.com": {
+            "url": "grpcs://localhost:7052",
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICRjCCAe2gAwIBAgIQQWZrrdz9KvkQH/4RY0tz0DAKBggqhkjOPQQDAjBuMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEVMBMGA1UEChMMb3JnMi5jY2IuY29tMRswGQYDVQQDExJ0bHNjYS5v\ncmcyLmNjYi5jb20wHhcNMjAxMTA5MDU0NTAwWhcNMzAxMTA3MDU0NTAwWjBuMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEVMBMGA1UEChMMb3JnMi5jY2IuY29tMRswGQYDVQQDExJ0bHNjYS5v\ncmcyLmNjYi5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQfJFRAZay2ErRX\ngveeX5Ry9Qf118K0ehy36jhFXEImZr9HdriQs8ooHliPYWP8YyXsDV+rul80gEAo\nptOgqEOio20wazAOBgNVHQ8BAf8EBAMCAaYwHQYDVR0lBBYwFAYIKwYBBQUHAwIG\nCCsGAQUFBwMBMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIIdrybwvIGyzEZK9\nSbUx0ER1GxMoe1Rhv1zd7dF+lGmWMAoGCCqGSM49BAMCA0cAMEQCIFI0WwdXYUJG\nw1FPm2ThBkC0Vd5dD14VnhMWzhDhbAmZAiAFVaPaRIYmgWM5Nh2rO5ZfuTr7HBJ2\nPqH1hasHDmdFEQ==\n-----END CERTIFICATE-----\n"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1.org1.ccb.com",
+                "hostnameOverride": "peer1.org1.ccb.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.org1.ccb.com": {
+            "url": "https://localhost:7054",
+            "caName": "ca",
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE-----\nMIICQTCCAeegAwIBAgIQFzCKdxcCe+LAqw8tZtzL5TAKBggqhkjOPQQDAjBrMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEVMBMGA1UEChMMb3JnMi5jY2IuY29tMRgwFgYDVQQDEw9jYS5vcmcy\nLmNjYi5jb20wHhcNMjAxMTA5MDU0NTAwWhcNMzAxMTA3MDU0NTAwWjBrMQswCQYD\nVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5j\naXNjbzEVMBMGA1UEChMMb3JnMi5jY2IuY29tMRgwFgYDVQQDEw9jYS5vcmcyLmNj\nYi5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAQF22LHW2Tv6EaO5UJft/Yf\nTUqj4hUTY1g4k30Vc0rBUiw7yUggeYvQjVTXNEibBkBFN2Y+Z3DIBEncIDitPvl6\no20wazAOBgNVHQ8BAf8EBAMCAaYwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUF\nBwMBMA8GA1UdEwEB/wQFMAMBAf8wKQYDVR0OBCIEIGvsoVJk3OcKrfGsrGJpglm+\nXEpL+uMD7OBeBvzOvQHWMAoGCCqGSM49BAMCA0gAMEUCIQDEWZaIuwEsm6wV0prD\nbXYOIN1m7pZHDlb1JHb48HCxDQIgYE/T3G4oWE/Y4aY+38wApPvuF8umAImjw2UD\nAWedZbY=\n-----END CERTIFICATE-----\n"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

@@ -1,0 +1,60 @@
+{
+    "name": "network001",
+    "version": "1.0.0",
+    "client": {
+        "organization": "Org${ORG}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "Org${ORG}": {
+            "mspid": "Org${ORG}MSP",
+            "peers": [
+                "peer0.org${ORG}.ccb.com",
+                "peer1.org${ORG}.ccb.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org${ORG}.ccb.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.org${ORG}.ccb.com": {
+            "url": "grpcs://${IP}:${P0PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org${ORG}.ccb.com",
+                "hostnameOverride": "peer0.org${ORG}.ccb.com"
+            }
+        },
+        "peer1.org${ORG}.ccb.com": {
+            "url": "grpcs://${IP}:${P1PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1.org${ORG}.ccb.com",
+                "hostnameOverride": "peer1.org${ORG}.ccb.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.org${ORG}.ccb.com": {
+            "url": "https://${IP}:${CAPORT}",
+            "caName": "ca",
+            "tlsCACerts": {
+                "pem": "${CAPEM}"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}
