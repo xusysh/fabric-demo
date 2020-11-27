@@ -1,5 +1,7 @@
 package com.example.springbootfabricdemo.web;
 
+import com.example.springbootfabricdemo.entity.AccountInfo;
+import com.example.springbootfabricdemo.entity.Response;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,9 +13,15 @@ import java.util.Map;
 @RequestMapping("/account")
 public class AccountController {
 
+    /**
+     * 获取用户信息
+     * @param userId
+     * @return
+     */
     @GetMapping("/info/{userId}")
-    public Map<String,Object> getAccountInfo(@PathVariable String userId) {
-        return null;
+    public Response<AccountInfo> getAccountInfo(@PathVariable String userId) {
+
+        return Response.newSuccInstance(new AccountInfo());
     }
 
 }
