@@ -1,4 +1,4 @@
-package com.example.springbootfabricdemo.entity;
+package com.example.springbootfabricdemo.entity.fabric;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,5 +32,10 @@ public class TxInfo {
      * 转账金额
      */
     Double balance;
+
+    /**
+     * 金额id
+     */
+    String purseId;
 
 }

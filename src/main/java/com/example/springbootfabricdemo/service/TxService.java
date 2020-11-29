@@ -1,6 +1,6 @@
 package com.example.springbootfabricdemo.service;
 
-import com.example.springbootfabricdemo.entity.TxInfo;
+import com.example.springbootfabricdemo.entity.fabric.TxInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

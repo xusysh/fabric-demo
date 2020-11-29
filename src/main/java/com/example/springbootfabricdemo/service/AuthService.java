@@ -1,6 +1,6 @@
 package com.example.springbootfabricdemo.service;
 
-import com.example.springbootfabricdemo.entity.AccountInfo;
+import com.example.springbootfabricdemo.entity.User;
 import com.example.springbootfabricdemo.dto.Response;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AuthService {
 
     @PostMapping("/enroll-admin")
-    public Response<AccountInfo> enrollAdmin() {
+    public Response<User> enrollAdmin() {
         return null;
     }
 
@@ -20,7 +20,7 @@ public class AuthService {
      * @return
      */
     @PostMapping("/register-user")
-    public Response<AccountInfo> registerUser() {
+    public Response<User> registerUser() {
         return null;
     }
 

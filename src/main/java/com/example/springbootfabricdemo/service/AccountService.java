@@ -1,6 +1,6 @@
 package com.example.springbootfabricdemo.service;
 
-import com.example.springbootfabricdemo.entity.AccountInfo;
+import com.example.springbootfabricdemo.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/account")
 public class AccountService {
 
-    public AccountInfo getAccountInfo(String userId) {
+    public User getAccountInfo(String userId) {
         return null;
     }
 
