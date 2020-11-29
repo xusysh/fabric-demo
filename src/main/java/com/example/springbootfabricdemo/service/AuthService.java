@@ -1,7 +1,7 @@
 package com.example.springbootfabricdemo.service;
 
 import com.example.springbootfabricdemo.entity.AccountInfo;
-import com.example.springbootfabricdemo.entity.Response;
+import com.example.springbootfabricdemo.dto.Response;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
