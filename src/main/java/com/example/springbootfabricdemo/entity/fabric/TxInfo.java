@@ -16,7 +16,17 @@ public class TxInfo {
     /**
      * 交易发生时间
      */
-    Date time;
+    Date timestamp;
+
+    /**
+     * 交易日期
+     */
+    String date;
+
+    /**
+     * 交易时间
+     */
+    String time;
 
     /**
      * 付款方用户id
