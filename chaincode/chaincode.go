@@ -56,6 +56,12 @@ type Purse struct {
 	Remark   string  `json:"remark"`
 }
 
+// 资金流向
+type Flow struct {
+	TargetId string  `json:"targetId"`
+	Amount   float64 `json:"amount"`
+}
+
 /*
  *  初始化用户信息
  */
@@ -166,7 +172,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 	}
 	defer purseAsBytes.Close()
 	i := money
-	remark, _ := GetUUID()
+	remark, _ := getUUID()
 	for purseAsBytes.HasNext() {
 		purseRes, err := purseAsBytes.Next()
 		if err != nil {
@@ -186,7 +192,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		APIstub.PutState(purseRes.Key, purseRes.Value)
 		// 4.4 转入方新增一条purse
 		purse := Purse{}
-		purse.Id, _ = GetUUID()
+		purse.Id, _ = getUUID()
 		purse.UserId = args[1]
 		purse.Balance = money
 		purse.ParentId = purseTemp.Id
@@ -393,7 +399,7 @@ func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args []st
 	money, _ := strconv.ParseFloat(args[2], 64)
 	frombalance, _ := strconv.ParseFloat(args[4], 64)
 	tobalance, _ := strconv.ParseFloat(args[5], 64)
-	uuid, _ := GetUUID()
+	uuid, _ := getUUID()
 	record := Record{uuid, curTime[0:10], curTime[11:19], args[0], args[1], money, args[3], t.Unix(), frombalance, tobalance}
 	recordAsBytes, _ := json.Marshal(record)
 	err := APIstub.PutState(id, recordAsBytes)
@@ -405,13 +411,13 @@ func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args []st
 }
 
 /*
- * 根据parentId查询资金流向 todo
+ * 根据userId查询资金流向
  */
 func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if len(args) != 1 {
 		return shim.Error("Query Fund Flow Failed: Incorrect number of arguments. Expecting 1")
 	}
-	queryString := fmt.Sprintf(`{"selector": {"userId": %v}, "parentId": {"$regex" : "*"}}`, args[0])
+	queryString := fmt.Sprintf(`{"selector": "parentId": {"$regex" : "*"}}`)
 	purseAsBytes, purseErr := APIstub.GetQueryResult(queryString)
 	if purseErr != nil {
 		fmt.Println("Query Fund Flow Failed:" + purseErr.Error())
@@ -419,20 +425,60 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 	}
 	defer purseAsBytes.Close()
 
-	return shim.Success(nil)
+	var buffer bytes.Buffer
+	bArrayMemberAlreadyWritten := false
+	buffer.WriteString(`{"flows":[`)
+
+	for purseAsBytes.HasNext() {
+		purseNext, err := purseAsBytes.Next()
+		if err != nil {
+			return shim.Error("Query Fund Flow Failed:" + err.Error())
+		}
+		purse := Purse{}
+		json.Unmarshal(purseNext.Value, &purse)
+		if isUserPurse(APIstub, purse.Id, args[0]) {
+			flow := Flow{}
+			flow.TargetId = purse.UserId
+			flow.Amount = purse.Balance
+
+			if bArrayMemberAlreadyWritten == true {
+				buffer.WriteString(",")
+			}
+			res, _ := json.Marshal(flow)
+			buffer.WriteString(string(res))
+			bArrayMemberAlreadyWritten = true
+
+			buffer.WriteString(`]}`)
+		}
+	}
+	return shim.Success(buffer.Bytes())
 }
 
 /*
- *  根据当前钱包ID获取所有父钱包 todo
+ *  判断当前钱包源头是否是该user
  */
-func GetAllPurses(APIstub shim.ChaincodeStubInterface, id string, userid string, purses []Purse) []Purse {
-	return purses
+func isUserPurse(APIstub shim.ChaincodeStubInterface, id string, userid string) bool {
+	purseAsBytes, _ := APIstub.GetState(id)
+	purse := Purse{}
+	parentPurse := Purse{}
+	json.Unmarshal(purseAsBytes, &purse)
+	parentPurseBytes, parentErr := APIstub.GetState(purse.ParentId)
+	if parentErr != nil {
+		return false
+	} else {
+		json.Unmarshal(parentPurseBytes, &parentPurse)
+		if userid == parentPurse.UserId {
+			return true
+		} else {
+			return isUserPurse(APIstub, parentPurse.Id, userid)
+		}
+	}
 }
 
 /*
  * 生成uuid
  */
-func GetUUID() (string, error) {
+func getUUID() (string, error) {
 	u2, err := uuid.NewV4()
 	if err != nil {
 		fmt.Printf("Something went wrong: %s", err)
