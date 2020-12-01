@@ -48,4 +48,9 @@ public class TxInfo {
      */
     String purseId;
 
+    /**
+     * 交易标记
+     */
+    String remark;
+
 }
