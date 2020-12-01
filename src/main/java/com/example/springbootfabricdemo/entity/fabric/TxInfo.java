@@ -36,7 +36,7 @@ public class TxInfo {
     /**
      * 收款方用户id
      */
-    String destUid;
+    String targetUid;
 
     /**
      * 转账金额
