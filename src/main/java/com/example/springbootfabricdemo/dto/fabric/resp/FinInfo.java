@@ -12,7 +12,7 @@ public class FinInfo {
 
     Double income;
 
-    Double outcome;
+    Double expense;
 
     Double total;
 
