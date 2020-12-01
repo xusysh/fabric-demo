@@ -1,4 +1,4 @@
-package com.example.springbootfabricdemo.dto;
+package com.example.springbootfabricdemo.dto.resp;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
