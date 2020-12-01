@@ -44,6 +44,16 @@ public class TxInfo {
     Double balance;
 
     /**
+     * 付款方余额
+     */
+    Double sourceBalance;
+
+    /**
+     * 收款方余额
+     */
+    Double targetBalance;
+
+    /**
      * 金额id
      */
     String purseId;
