@@ -22,6 +22,7 @@ channels:
       - orderer1.ccb.com
     peers:
       peer0.org1.ccb.com:
+        discover: true
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
@@ -31,6 +32,30 @@ channels:
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
+    chaincodes:
+      - id: mycc
+        version: v1.0
+        language: golang
+        endorsement-policy:
+          {
+            "identities":
+              [
+                { "role": { "name": "member", "mspId": "Org1MSP" } },
+                { "role": { "name": "member", "mspId": "Org2MSP" } },
+                { "role": { "name": "admin", "mspId": "Org1MSP" } },
+                { "role": { "name": "admin", "mspId": "Org2MSP" } },
+              ],
+            "policy":
+              {
+                "1-of":
+                  [
+                    { "signed-by": 0 },
+                    { "signed-by": 1 },
+                    { "signed-by": 2 },
+                    { "signed-by": 3 },
+                  ],
+              },
+          }
 
 orderers:
   orderer1.ccb.com:

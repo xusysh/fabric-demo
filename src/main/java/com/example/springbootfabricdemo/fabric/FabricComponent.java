@@ -58,7 +58,7 @@ public class FabricComponent {
             System.out.println("An identity for the user \"user1\" already exists in the wallet");
             return;
         }
-        User admin = this.getAdminFabricUser(wallet,"admin");
+        User admin = this.getAdminFabricUser(wallet, "admin");
         // Register the user, enroll the user, and import the new identity into the wallet.
         RegistrationRequest registrationRequest = new RegistrationRequest(userId);
 //         registrationRequest.setAffiliation("org1.department1");
@@ -70,26 +70,24 @@ public class FabricComponent {
         System.out.println("Successfully enrolled user " + userId + " and imported it into the wallet");
     }
 
-    public void invokeQuery(String userId,String orgId,String apiName, String... args) throws Exception {
+    public void invokeQuery(String userId, String orgId, String apiName, String... args) throws Exception {
         //todo:直接根据userId找到orgId
-        Builder builder = this.getGatewayBuilder(userId,orgId);
+        Builder builder = this.getGatewayBuilder(userId, orgId);
         // create a gateway connection
-        try (Gateway gateway = builder.connect()) {
+        Gateway gateway = builder.connect();
 
-            // get the network and contract
-            Network network = gateway.getNetwork(fabricConfig.getChannelName());
-            Contract contract = network.getContract(fabricConfig.getChaincodeName());
+        // get the network and contract
+        Network network = gateway.getNetwork(fabricConfig.getChannelName());
+        Contract contract = network.getContract(fabricConfig.getChaincodeName());
 
-            byte[] result;
-            result = contract.evaluateTransaction(apiName, args);
-            System.out.println(new String(result));
+        byte[] result;
+        result = contract.evaluateTransaction(apiName, args);
+        System.out.println(new String(result));
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
-    private Builder getGatewayBuilder(String userId,String orgId) throws Exception {
+    private Builder getGatewayBuilder(String userId, String orgId) throws Exception {
         // Load a file system based wallet for managing identities.
         Wallet wallet = fabricConfig.getWallet();
         // load a CCP
@@ -100,11 +98,21 @@ public class FabricComponent {
         return builder;
     }
 
-    public void invokeTx(String userId,String apiName, String... args) {
+    public void invokeTx(String userId, String orgId, String apiName, String... args) throws Exception {
+        Builder builder = this.getGatewayBuilder(userId, orgId);
+        // create a gateway connection
+        Gateway gateway = builder.connect();
+        // get the network and contract
+        Network network = gateway.getNetwork(fabricConfig.getChannelName());
+        Contract contract = network.getContract(fabricConfig.getChaincodeName());
+
+        byte[] result;
+        result = contract.submitTransaction(apiName, args);
+        System.out.println(new String(result));
 
     }
 
-    public User getAdminFabricUser(Wallet wallet,String userId) throws IOException {
+    public User getAdminFabricUser(Wallet wallet, String userId) throws IOException {
         Identity adminIdentity = wallet.get(userId);
         User admin = new User() {
 

@@ -41,9 +41,10 @@ class SpringbootFabricDemoApplicationTests {
     void contextLoads() throws Exception {
         String userId = "user109";
         String orgId = "Org1";
-        fabricComponent.enrollAdmin("admin","adminpw");
-        fabricComponent.registerUser(userId,"Org1");
-        fabricComponent.invokeQuery(userId, orgId, "wallet", "guojingyu.js");
+        fabricComponent.enrollAdmin("admin", "adminpw");
+        fabricComponent.registerUser(userId, "Org1");
+        fabricComponent.invokeQuery(userId, orgId, "wallet", "zhuhao2.js");
+        fabricComponent.invokeTx(userId, orgId, "donate", "zhuhao2.js", "guojingyu.js", "1");
 //        this.registerUser("user107","Org1");
     }
 
