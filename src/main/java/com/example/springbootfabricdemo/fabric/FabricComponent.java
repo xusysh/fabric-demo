@@ -51,18 +51,23 @@ public class FabricComponent {
         System.out.println("Successfully enrolled user \"admin\" and imported it into the wallet");
     }
 
-    public void registerUser(String userId, String passwd) throws Exception {
+    public void registerUser(String userId, String orgId) throws Exception {
         Wallet wallet = fabricConfig.getWallet();
-        User admin = this.getAdminFabricUser(wallet);
+        boolean userExists = wallet.exists(userId);
+        if (userExists) {
+            System.out.println("An identity for the user \"user1\" already exists in the wallet");
+            return;
+        }
+        User admin = this.getAdminFabricUser(wallet,"admin");
         // Register the user, enroll the user, and import the new identity into the wallet.
-        RegistrationRequest registrationRequest = new RegistrationRequest("user4");
-        // registrationRequest.setAffiliation("org1.department1");
-        registrationRequest.setEnrollmentID("user4");
+        RegistrationRequest registrationRequest = new RegistrationRequest(userId);
+//         registrationRequest.setAffiliation("org1.department1");
+        registrationRequest.setEnrollmentID(userId);
         String enrollmentSecret = caClient.register(registrationRequest, admin);
-        Enrollment enrollment = caClient.enroll("user4", enrollmentSecret);
-        Identity user = Identity.createIdentity("Org1MSP", enrollment.getCert(), enrollment.getKey());
-        wallet.put("user4", user);
-        System.out.println("Successfully enrolled user \"user1\" and imported it into the wallet");
+        Enrollment enrollment = caClient.enroll(userId, enrollmentSecret);
+        Identity user = Identity.createIdentity(orgId + "MSP", enrollment.getCert(), enrollment.getKey());
+        wallet.put(userId, user);
+        System.out.println("Successfully enrolled user " + userId + " and imported it into the wallet");
     }
 
     public void invokeQuery(String userId,String apiName, String... args) throws Exception {
@@ -97,8 +102,8 @@ public class FabricComponent {
 
     }
 
-    public User getAdminFabricUser(Wallet wallet) throws IOException {
-        Identity adminIdentity = wallet.get("admin");
+    public User getAdminFabricUser(Wallet wallet,String userId) throws IOException {
+        Identity adminIdentity = wallet.get(userId);
         User admin = new User() {
 
             @Override
