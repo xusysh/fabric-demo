@@ -70,8 +70,9 @@ public class FabricComponent {
         System.out.println("Successfully enrolled user " + userId + " and imported it into the wallet");
     }
 
-    public void invokeQuery(String userId,String apiName, String... args) throws Exception {
-        Builder builder = this.getGatewayBuilder(userId);
+    public void invokeQuery(String userId,String orgId,String apiName, String... args) throws Exception {
+        //todo:直接根据userId找到orgId
+        Builder builder = this.getGatewayBuilder(userId,orgId);
         // create a gateway connection
         try (Gateway gateway = builder.connect()) {
 
@@ -88,11 +89,12 @@ public class FabricComponent {
         }
     }
 
-    private Builder getGatewayBuilder(String userId) throws Exception {
+    private Builder getGatewayBuilder(String userId,String orgId) throws Exception {
         // Load a file system based wallet for managing identities.
         Wallet wallet = fabricConfig.getWallet();
         // load a CCP
-        Path networkConfigPath = Paths.get(fabricConfig.getConfigPath());
+        Path networkConfigPath = Paths.get(
+                this.getClass().getClassLoader().getResource(fabricConfig.getConfigPath() + "connection-" + orgId + ".yaml").toURI());
         Gateway.Builder builder = Gateway.createBuilder();
         builder.identity(wallet, userId).networkConfig(networkConfigPath).discovery(true);
         return builder;

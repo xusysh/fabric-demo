@@ -39,8 +39,11 @@ class SpringbootFabricDemoApplicationTests {
 
     @Test
     void contextLoads() throws Exception {
-//        fabricComponent.enrollAdmin("admin","adminpw");
-        fabricComponent.registerUser("user109","Org1");
+        String userId = "user109";
+        String orgId = "Org1";
+        fabricComponent.enrollAdmin("admin","adminpw");
+        fabricComponent.registerUser(userId,"Org1");
+        fabricComponent.invokeQuery(userId, orgId, "wallet", "guojingyu.js");
 //        this.registerUser("user107","Org1");
     }
 
