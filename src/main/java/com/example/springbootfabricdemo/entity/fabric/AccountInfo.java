@@ -16,7 +16,7 @@ public class AccountInfo {
 
     String id;
 
-    String userName;
+    String username;
 
     String password;
 
