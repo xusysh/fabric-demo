@@ -50,7 +50,7 @@ type IncomeExpense struct {
 // 钱包 key为ID
 type Purse struct {
 	Id       string  `json:"id"`
-	Balance  float64 `json:"money"`
+	Balance  float64 `json:"balance"`
 	UserId   string  `json:"userId"`
 	ParentId string  `json:"parentId"`
 	Remark   string  `json:"remark"`
@@ -182,33 +182,35 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		}
 		purseTemp := Purse{}
 		json.Unmarshal(purseRes.Value, &purseTemp)
-		if purseTemp.Balance-i >= 0 {
+		curMoney := i
+		if purseTemp.Balance >= i {
 			purseTemp.Balance = purseTemp.Balance - i
 			i = 0
 		} else {
-			purseTemp.Balance = 0
 			i = i - purseTemp.Balance
+			curMoney = purseTemp.Balance
+			purseTemp.Balance = 0
 		}
 		purseTemp.Remark = remark
-		purseRes.Value, _ = json.Marshal(purseTemp)
-		APIstub.PutState(purseRes.Key, purseRes.Value)
+		purseBytes, _ := json.Marshal(purseTemp)
+		APIstub.PutState(purseRes.Key, purseBytes)
 		// 4.4 转入方新增一条purse
 		purse := Purse{}
 		purse.Id, _ = getUUID()
 		purse.UserId = args[1]
-		purse.Balance = money
+		purse.Balance = curMoney
 		purse.ParentId = purseTemp.Id
 		purse.Remark = remark
 		purseNew, _ := json.Marshal(purse)
 		APIstub.PutState(purse.Id, purseNew)
 		// 4.5 增加交易记录
-		var argsnew []string
+		var argsnew [6]string
 		argsnew[0] = args[0]
 		argsnew[1] = args[1]
-		argsnew[2] = args[2]
-		argsnew[3] = purse.Id
-		argsnew[4] = strconv.FormatFloat(accountFromJson.Balance, 'E', -1, 64)
-		argsnew[5] = strconv.FormatFloat(accountToJson.Balance, 'E', -1, 64)
+		argsnew[2] = strconv.FormatFloat(curMoney, 'E', -1, 64)
+		argsnew[3] = purseTemp.Id
+		argsnew[4] = strconv.FormatFloat(accountFromJson.Balance+money-curMoney, 'E', -1, 64)
+		argsnew[5] = strconv.FormatFloat(accountToJson.Balance-money+curMoney, 'E', -1, 64)
 		s.addRecord(APIstub, argsnew)
 		if i == 0 {
 			break
@@ -394,8 +396,8 @@ func (s *SmartContract) updateBalance(APIstub shim.ChaincodeStubInterface, args 
 /*
  *  新增交易记录，当前流程为：在交易记录表增加一条记录
  */
-func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if len(args) != 3 {
+func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [6]string) sc.Response {
+	if len(args) != 6 {
 		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 3")
 	}
 	t := time.Now()
