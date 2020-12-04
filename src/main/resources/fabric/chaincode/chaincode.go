@@ -127,6 +127,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 	}
 	accountFromJson := Account{}
 	json.Unmarshal(accountFrom, &accountFromJson)
+	originalFromBalance := accountFromJson.Balance
 
 	// 2.判断转出金额是否小于转出方所有存款
 	money, _ := strconv.ParseFloat(args[2], 64)
@@ -143,6 +144,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 	}
 	accountToJson := Account{}
 	json.Unmarshal(accountTo, &accountToJson)
+	originalToBalance := accountToJson.Balance
 
 	// 4.执行转账交易
 	accountFromJson.Balance -= money
@@ -166,7 +168,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		return shim.Error(fromUpdateErr.Error())
 	}
 	// 4.3 转出方purse信息更新
-	queryString := fmt.Sprintf(`{"selector": {"userId": "%v", "parentId": {"$regex" : ".*"}}}`, args[0])
+	queryString := fmt.Sprintf(`{"selector": {"userId": "%v", "parentId": {"$regex" : ".*"}, "balance": {"$gt": 0}}}`, args[0])
 	purseAsBytes, purseErr := APIstub.GetQueryResult(queryString)
 	if purseErr != nil {
 		fmt.Println("Donate Money Failed:" + purseErr.Error())
@@ -208,9 +210,11 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		argsnew[0] = args[0]
 		argsnew[1] = args[1]
 		argsnew[2] = strconv.FormatFloat(curMoney, 'E', -1, 64)
-		argsnew[3] = purseTemp.Id
-		argsnew[4] = strconv.FormatFloat(accountFromJson.Balance+money-curMoney, 'E', -1, 64)
-		argsnew[5] = strconv.FormatFloat(accountToJson.Balance-money+curMoney, 'E', -1, 64)
+		argsnew[3] = purse.Id
+		originalFromBalance = originalFromBalance - curMoney
+		originalToBalance = originalToBalance + curMoney
+		argsnew[4] = strconv.FormatFloat(originalFromBalance, 'E', -1, 64)
+		argsnew[5] = strconv.FormatFloat(originalToBalance, 'E', -1, 64)
 		s.addRecord(APIstub, argsnew)
 		if i == 0 {
 			break
@@ -309,7 +313,6 @@ func (s *SmartContract) recordByDate(APIstub shim.ChaincodeStubInterface, args [
 				countIncome[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
 			} else {
 				countIncome[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
-				countDays.PushBack(record.Date)
 			}
 		} else {
 			// 支出
@@ -318,7 +321,6 @@ func (s *SmartContract) recordByDate(APIstub shim.ChaincodeStubInterface, args [
 				countExpense[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
 			} else {
 				countExpense[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
-				countDays.PushBack(record.Date)
 			}
 		}
 		// 当日余额
@@ -332,6 +334,7 @@ func (s *SmartContract) recordByDate(APIstub shim.ChaincodeStubInterface, args [
 				}
 			}
 		} else {
+			countDays.PushBack(record.Date)
 			lastTime[record.Date] = record.Timestamp
 			if record.From == args[0] {
 				countTotal[record.Date] = strconv.FormatFloat(record.FromBalance, 'E', -1, 64)
@@ -433,10 +436,8 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 	}
 	defer purseAsBytes.Close()
 
-	var buffer bytes.Buffer
-	bArrayMemberAlreadyWritten := false
-	buffer.WriteString(`{"flows":[`)
-
+	flowMap := make(map[string]float64)
+	flowTargets := list.New()
 	for purseAsBytes.HasNext() {
 		purseNext, err := purseAsBytes.Next()
 		if err != nil {
@@ -445,17 +446,29 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 		purse := Purse{}
 		json.Unmarshal(purseNext.Value, &purse)
 		if isUserPurse(APIstub, purse.Id, args[0]) {
-			flow := Flow{}
-			flow.TargetId = purse.UserId
-			flow.Amount = purse.Balance
-
-			if bArrayMemberAlreadyWritten == true {
-				buffer.WriteString(",")
+			if _, ok := flowMap[purse.UserId]; ok {
+				flowMap[purse.UserId] = flowMap[purse.UserId] + purse.Balance
+			} else {
+				flowMap[purse.UserId] = purse.Balance
+				flowTargets.PushBack(purse.UserId)
 			}
-			res, _ := json.Marshal(flow)
-			buffer.WriteString(string(res))
-			bArrayMemberAlreadyWritten = true
 		}
+	}
+
+	var buffer bytes.Buffer
+	bArrayMemberAlreadyWritten := false
+	buffer.WriteString(`{"flows":[`)
+	for i := flowTargets.Front(); i != nil; i = i.Next() {
+		target := i.Value.(string)
+		flow := Flow{}
+		flow.TargetId = target
+		flow.Amount = flowMap[target]
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		res, _ := json.Marshal(flow)
+		buffer.WriteString(string(res))
+		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString(`]}`)
 	return shim.Success(buffer.Bytes())
