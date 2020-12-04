@@ -1,5 +1,7 @@
 package com.example.springbootfabricdemo.fabric;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.example.springbootfabricdemo.config.FabricConfig;
 import com.fasterxml.jackson.databind.util.BeanUtil;
 import org.hyperledger.fabric.gateway.*;
@@ -70,21 +72,28 @@ public class FabricComponent {
         System.out.println("Successfully enrolled user " + userId + " and imported it into the wallet");
     }
 
-    public void invokeQuery(String userId, String orgId, String apiName, String... args) throws Exception {
+    public String invokeQuery(String userId, String apiName, String... args) throws Exception {
+        Contract contract = this.getNetworkAndContract(userId);
+        String result = new String(contract.evaluateTransaction(apiName, args));
+        return result;
+    }
+
+    public String invokeTx(String userId, String apiName, String... args) throws Exception {
+        Contract contract = this.getNetworkAndContract(userId);
+        String result = new String(contract.submitTransaction(apiName, args));
+        return result;
+    }
+
+    private Contract getNetworkAndContract(String userId) throws Exception {
         //todo:直接根据userId找到orgId
+        String orgId = "Org1";
         Builder builder = this.getGatewayBuilder(userId, orgId);
         // create a gateway connection
         Gateway gateway = builder.connect();
-
         // get the network and contract
         Network network = gateway.getNetwork(fabricConfig.getChannelName());
         Contract contract = network.getContract(fabricConfig.getChaincodeName());
-
-        byte[] result;
-        result = contract.evaluateTransaction(apiName, args);
-        System.out.println(new String(result));
-
-
+        return contract;
     }
 
     private Builder getGatewayBuilder(String userId, String orgId) throws Exception {
@@ -98,19 +107,6 @@ public class FabricComponent {
         return builder;
     }
 
-    public void invokeTx(String userId, String orgId, String apiName, String... args) throws Exception {
-        Builder builder = this.getGatewayBuilder(userId, orgId);
-        // create a gateway connection
-        Gateway gateway = builder.connect();
-        // get the network and contract
-        Network network = gateway.getNetwork(fabricConfig.getChannelName());
-        Contract contract = network.getContract(fabricConfig.getChaincodeName());
-
-        byte[] result;
-        result = contract.submitTransaction(apiName, args);
-        System.out.println(new String(result));
-
-    }
 
     public User getAdminFabricUser(Wallet wallet, String userId) throws IOException {
         Identity adminIdentity = wallet.get(userId);

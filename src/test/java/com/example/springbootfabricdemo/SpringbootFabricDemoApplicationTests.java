@@ -1,9 +1,13 @@
 package com.example.springbootfabricdemo;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.example.springbootfabricdemo.config.FabricConfig;
 import com.example.springbootfabricdemo.dto.fabric.req.FinLocQuery;
+import com.example.springbootfabricdemo.entity.fabric.AccountInfo;
 import com.example.springbootfabricdemo.fabric.FabricComponent;
 import org.apache.commons.beanutils.BeanUtils;
+import org.hyperledger.fabric.gateway.Contract;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,13 +42,31 @@ class SpringbootFabricDemoApplicationTests {
 
 
     @Test
+    void fastjson() throws Exception {
+        AccountInfo accountInfo = parseObject("{\n" +
+                "    \"id\": \"id1\",\n" +
+                "    \"username\": \"uname1\",\n" +
+                "    \"password\": \"pwd1\",\n" +
+                "    \"balance\": \"12\",\n" +
+                "    \"orgId\": \"org\"\n" +
+                "}",AccountInfo.class);
+        int a = 1;
+    }
+
+    <T> T parseObject(String json, Class<T> clazz) throws Exception {
+        T obj = (T) JSON.parseObject(json,clazz);
+        return obj;
+    }
+
+
+    @Test
     void contextLoads() throws Exception {
         String userId = "user109";
         String orgId = "Org1";
         fabricComponent.enrollAdmin("admin", "adminpw");
         fabricComponent.registerUser(userId, "Org1");
-        fabricComponent.invokeQuery(userId, orgId, "wallet", "zhuhao2.js");
-        fabricComponent.invokeTx(userId, orgId, "donate", "zhuhao2.js", "guojingyu.js", "1");
+        AccountInfo accountInfo = fabricComponent.invokeQuery(userId, "wallet", "zhuhao2.js");
+        fabricComponent.invokeTx(userId, "donate", "zhuhao2.js", "guojingyu.js", "1");
 //        this.registerUser("user107","Org1");
     }
 
