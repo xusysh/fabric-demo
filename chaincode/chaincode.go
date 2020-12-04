@@ -83,8 +83,8 @@ func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
 		accountAsBytes, _ := json.Marshal(Accounts[i])
 		APIstub.PutState(Accounts[i].UserId, accountAsBytes)
 		purseAsBytes, _ := json.Marshal(Purses[i])
-		//		uuid, _ := GetUUID()
-		APIstub.PutState("purse"+string(i+1), purseAsBytes)
+		//		uuid, _ := getUUID()
+		APIstub.PutState("purse"+strconv.Itoa(i+1), purseAsBytes)
 		i = i + 1
 	}
 	return shim.Success(nil)
@@ -104,6 +104,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.record(APIstub, args)
 	} else if function == "inAndOut" {
 		return s.recordByDate(APIstub, args)
+	} else if function == "flow" {
+		return s.fundFlow(APIstub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
@@ -164,7 +166,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		return shim.Error(fromUpdateErr.Error())
 	}
 	// 4.3 转出方purse信息更新
-	queryString := fmt.Sprintf(`{"selector": {"userId": %v}, "parentId": {"$regex" : "*"}}`, args[0])
+	queryString := fmt.Sprintf(`{"selector": {"userId": "%v", "parentId": {"$regex" : ".*"}}}`, args[0])
 	purseAsBytes, purseErr := APIstub.GetQueryResult(queryString)
 	if purseErr != nil {
 		fmt.Println("Donate Money Failed:" + purseErr.Error())
@@ -240,7 +242,7 @@ func (s *SmartContract) record(APIstub shim.ChaincodeStubInterface, args []strin
 		return shim.Error("Query Record Failed: Incorrect number of arguments. Expecting 1")
 	}
 	//	 querySql := "{\"selector\": {\"from\": \"" + args[0] + "\"}}"
-	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": %v},{"to": %v}]}}`, args[0], args[0])
+	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": "%v"},{"to": "%v"}]}}`, args[0], args[0])
 
 	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
 	if queryErr != nil {
@@ -277,7 +279,7 @@ func (s *SmartContract) recordByDate(APIstub shim.ChaincodeStubInterface, args [
 		return shim.Error("Query Income And Expense By Date Failed: Incorrect number of arguments. Expecting 3")
 	}
 
-	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": %v},{"to": %v}],"date": {"$gt": %v,"$lt": %v}}}`, args[0], args[0], args[1], args[2])
+	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": "%v"},{"to": "%v"}],"date": {"$gt": "%v","$lt": "%v"}}}`, args[0], args[0], args[1], args[2])
 	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
 	if queryErr != nil {
 		fmt.Println("Query Income And Expense By Date Failed:" + queryErr.Error())
@@ -299,19 +301,23 @@ func (s *SmartContract) recordByDate(APIstub shim.ChaincodeStubInterface, args [
 		record := Record{}
 		json.Unmarshal(queryRes.Value, &record)
 		// 收入
-		if _, ok := countIncome[record.Date]; ok {
-			curMoney, _ := strconv.ParseFloat(countIncome[record.Date], 64)
-			countIncome[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
+		if record.To == args[0] {
+			if _, ok := countIncome[record.Date]; ok {
+				curMoney, _ := strconv.ParseFloat(countIncome[record.Date], 64)
+				countIncome[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
+			} else {
+				countIncome[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
+				countDays.PushBack(record.Date)
+			}
 		} else {
-			countIncome[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
-			countDays.PushBack(record.Date)
-		}
-		// 支出
-		if _, ok := countExpense[record.Date]; ok {
-			curMoney, _ := strconv.ParseFloat(countExpense[record.Date], 64)
-			countExpense[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
-		} else {
-			countExpense[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
+			// 支出
+			if _, ok := countExpense[record.Date]; ok {
+				curMoney, _ := strconv.ParseFloat(countExpense[record.Date], 64)
+				countExpense[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
+			} else {
+				countExpense[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
+				countDays.PushBack(record.Date)
+			}
 		}
 		// 当日余额
 		if _, ok := lastTime[record.Date]; ok {
@@ -417,7 +423,7 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 	if len(args) != 1 {
 		return shim.Error("Query Fund Flow Failed: Incorrect number of arguments. Expecting 1")
 	}
-	queryString := fmt.Sprintf(`{"selector": "parentId": {"$regex" : "*"}}`)
+	queryString := fmt.Sprintf(`{"selector": {"parentId": {"$regex" : ".*"}}}`)
 	purseAsBytes, purseErr := APIstub.GetQueryResult(queryString)
 	if purseErr != nil {
 		fmt.Println("Query Fund Flow Failed:" + purseErr.Error())
@@ -447,10 +453,9 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 			res, _ := json.Marshal(flow)
 			buffer.WriteString(string(res))
 			bArrayMemberAlreadyWritten = true
-
-			buffer.WriteString(`]}`)
 		}
 	}
+	buffer.WriteString(`]}`)
 	return shim.Success(buffer.Bytes())
 }
 
