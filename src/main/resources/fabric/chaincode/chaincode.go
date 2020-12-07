@@ -404,8 +404,8 @@ func (s *SmartContract) updateBalance(APIstub shim.ChaincodeStubInterface, args 
  *  新增交易记录，当前流程为：在交易记录表增加一条记录
  */
 func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [8]string) sc.Response {
-	if len(args) != 6 {
-		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 3")
+	if len(args) != 8 {
+		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 8")
 	}
 	t := time.Now()
 	var timeLayoutStr = "2006-01-02 15:04:05" //go中的时间格式化必须是这个时间
