@@ -37,6 +37,8 @@ type Record struct {
 	Timestamp   int64   `json:"timestamp"`
 	FromBalance float64 `json:"frombalance"`
 	ToBalance   float64 `json:"tobalance"`
+	Comment     string  `json:"comment"`
+	Remark      string  `json:"remark"`
 }
 
 // 收支情况
@@ -115,8 +117,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
  *  donate方法，即捐赠方法，需要指定转出方(args[0])、转出方(args[1])和金额(args[2])
  */
 func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if len(args) != 3 {
-		return shim.Error("Donate Money Failed: Incorrect number of arguments. Expecting 3")
+	if len(args) != 4 {
+		return shim.Error("Donate Money Failed: Incorrect number of arguments. Expecting 4")
 	}
 
 	// 1.判断转出方用户是否存在
@@ -206,7 +208,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		purseNew, _ := json.Marshal(purse)
 		APIstub.PutState(purse.Id, purseNew)
 		// 4.5 增加交易记录
-		var argsnew [6]string
+		var argsnew [8]string
 		argsnew[0] = args[0]
 		argsnew[1] = args[1]
 		argsnew[2] = strconv.FormatFloat(curMoney, 'E', -1, 64)
@@ -215,6 +217,8 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		originalToBalance = originalToBalance + curMoney
 		argsnew[4] = strconv.FormatFloat(originalFromBalance, 'E', -1, 64)
 		argsnew[5] = strconv.FormatFloat(originalToBalance, 'E', -1, 64)
+		argsnew[6] = args[3]
+		argsnew[7] = remark
 		s.addRecord(APIstub, argsnew)
 		if i == 0 {
 			break
@@ -399,9 +403,9 @@ func (s *SmartContract) updateBalance(APIstub shim.ChaincodeStubInterface, args 
 /*
  *  新增交易记录，当前流程为：在交易记录表增加一条记录
  */
-func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [6]string) sc.Response {
-	if len(args) != 6 {
-		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 3")
+func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [8]string) sc.Response {
+	if len(args) != 8 {
+		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 8")
 	}
 	t := time.Now()
 	var timeLayoutStr = "2006-01-02 15:04:05" //go中的时间格式化必须是这个时间
@@ -410,7 +414,7 @@ func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [6]s
 	frombalance, _ := strconv.ParseFloat(args[4], 64)
 	tobalance, _ := strconv.ParseFloat(args[5], 64)
 	uuid, _ := getUUID()
-	record := Record{uuid, curTime[0:10], curTime[11:19], args[0], args[1], money, args[3], t.Unix(), frombalance, tobalance}
+	record := Record{uuid, curTime[0:10], curTime[11:19], args[0], args[1], money, args[3], t.Unix(), frombalance, tobalance, args[6], args[7]}
 	recordAsBytes, _ := json.Marshal(record)
 	err := APIstub.PutState(uuid, recordAsBytes)
 	if err != nil {
