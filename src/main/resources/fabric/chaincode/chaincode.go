@@ -404,7 +404,6 @@ func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [6]s
 		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 3")
 	}
 	t := time.Now()
-	id := strconv.FormatInt(t.Unix(), 10)
 	var timeLayoutStr = "2006-01-02 15:04:05" //go中的时间格式化必须是这个时间
 	curTime := t.Format(timeLayoutStr)
 	money, _ := strconv.ParseFloat(args[2], 64)
@@ -413,7 +412,7 @@ func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [6]s
 	uuid, _ := getUUID()
 	record := Record{uuid, curTime[0:10], curTime[11:19], args[0], args[1], money, args[3], t.Unix(), frombalance, tobalance}
 	recordAsBytes, _ := json.Marshal(record)
-	err := APIstub.PutState(id, recordAsBytes)
+	err := APIstub.PutState(uuid, recordAsBytes)
 	if err != nil {
 		fmt.Println("Add Record Failed:" + err.Error())
 		return shim.Error(err.Error())
