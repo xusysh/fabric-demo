@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -47,7 +48,9 @@ public class FabricConfig {
     }
 
     public Wallet getWallet() throws Exception {
-        Wallet wallet = Wallet.createFileSystemWallet(Paths.get(this.getClass().getClassLoader().getResource(walletPath).toURI()));
+//        URI walletURI = this.getClass().getClassLoader().getResource(walletPath).toURI();
+        Path walletPath = Paths.get("wallet");
+        Wallet wallet = Wallet.createFileSystemWallet(walletPath);
         return wallet;
     }
 

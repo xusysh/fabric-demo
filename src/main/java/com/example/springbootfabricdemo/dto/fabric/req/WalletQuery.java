@@ -6,10 +6,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * 查询指定时间内，用户所有收入和支出的交易信息
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinLocQuery {
+public class WalletQuery {
 
     String userId;
 

@@ -1,27 +1,20 @@
 package com.example.springbootfabricdemo;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.JSONArray;
 import com.example.springbootfabricdemo.config.FabricConfig;
-import com.example.springbootfabricdemo.dto.fabric.req.FinLocQuery;
 import com.example.springbootfabricdemo.entity.fabric.AccountInfo;
+import com.example.springbootfabricdemo.entity.fabric.TxInfo;
 import com.example.springbootfabricdemo.fabric.FabricComponent;
-import org.apache.commons.beanutils.BeanUtils;
-import org.hyperledger.fabric.gateway.Contract;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 import java.nio.file.Paths;
 import java.security.PrivateKey;
-import java.util.Properties;
-import java.util.Set;
 
 import org.hyperledger.fabric.gateway.Wallet;
 import org.hyperledger.fabric.gateway.Wallet.Identity;
@@ -39,6 +32,9 @@ class SpringbootFabricDemoApplicationTests {
 
     @Autowired
     FabricConfig fabricConfig;
+
+    String userId = "user110";
+    String orgId = "Org1";
 
 
     @Test
@@ -61,13 +57,31 @@ class SpringbootFabricDemoApplicationTests {
 
     @Test
     void contextLoads() throws Exception {
-        String userId = "user109";
-        String orgId = "Org1";
+
         fabricComponent.enrollAdmin("admin", "adminpw");
         fabricComponent.registerUser(userId, "Org1");
-        AccountInfo accountInfo = fabricComponent.invokeQuery(userId, "wallet", "zhuhao2.js");
-        fabricComponent.invokeTx(userId, "donate", "zhuhao2.js", "guojingyu.js", "1");
+        // 查询余额
+        String resp = fabricComponent.invokeQuery(userId, "wallet", "zhuhao2.js");
+        System.out.println(resp);
+        // 查询交易记录
+        resp = fabricComponent.invokeQuery(userId, "record", "zhuhao2.js");
+        System.out.println(resp);
+        List<TxInfo> emm = JSON.parseArray(resp, TxInfo.class);
+        // 转账
+        resp = fabricComponent.invokeTx(userId, "donate", "zhuhao2.js", "guojingyu.js", "1");
+        System.out.println(resp);
 //        this.registerUser("user107","Org1");
+    }
+
+    @Test
+    void txInfo() throws Exception {
+        // 查询交易记录
+        String resp = fabricComponent.invokeQuery(userId, "record", "zhuhao2.js");
+        System.out.println(resp);
+        Map<String,JSONArray> emm = JSON.parseObject(resp,Map.class);
+        JSONArray emm2 = emm.get("records");
+        List<TxInfo> txInfo = emm2.toJavaList(TxInfo.class);
+        return;
     }
 
     @Test

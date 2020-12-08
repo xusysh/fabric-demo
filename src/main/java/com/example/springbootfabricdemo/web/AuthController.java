@@ -1,14 +1,16 @@
-package com.example.springbootfabricdemo.service;
+package com.example.springbootfabricdemo.web;
 
-import com.example.springbootfabricdemo.entity.User;
 import com.example.springbootfabricdemo.dto.resp.Response;
-import org.springframework.stereotype.Service;
+import com.example.springbootfabricdemo.entity.User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Service
-public class AuthService {
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
 
+    @PostMapping("/enroll-admin")
     public Response<User> enrollAdmin() {
         return null;
     }
@@ -17,6 +19,7 @@ public class AuthService {
      * 注册用户
      * @return
      */
+    @PostMapping("/register-user")
     public Response<User> registerUser() {
         return null;
     }

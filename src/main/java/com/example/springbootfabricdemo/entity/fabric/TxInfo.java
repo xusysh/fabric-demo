@@ -11,56 +11,61 @@ import java.util.Date;
 @NoArgsConstructor
 public class TxInfo {
 
-    String id;
+    String Id;
 
     /**
      * 交易发生时间
      */
-    Date timestamp;
+    Long Timestamp;
 
     /**
      * 交易日期
      */
-    String date;
+    String Date;
 
     /**
      * 交易时间
      */
-    String time;
+    String Time;
 
     /**
      * 付款方用户id
      */
-    String sourceUid;
+    String From;
 
     /**
      * 收款方用户id
      */
-    String targetUid;
+    String To;
 
     /**
      * 转账金额
      */
-    Double balance;
+    Double Money;
 
     /**
      * 付款方余额
      */
-    Double sourceBalance;
+    Double FromBalance;
 
     /**
      * 收款方余额
      */
-    Double targetBalance;
+    Double ToBalance;
 
     /**
      * 金额id
      */
-    String purseId;
+    String PurseId;
 
     /**
      * 交易标记
      */
     String remark;
+
+    /**
+     * 备注
+     */
+    String comment;
 
 }
