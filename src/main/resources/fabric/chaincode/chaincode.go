@@ -105,16 +105,20 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	} else if function == "record" {
 		return s.record(APIstub, args)
 	} else if function == "inAndOut" {
-		return s.recordByDate(APIstub, args)
+		return s.inAndOut(APIstub, args)
 	} else if function == "flow" {
 		return s.fundFlow(APIstub, args)
+	} else if function == "recordByCondition" {
+		return s.recordByCondition(APIstub, args)
+	} else if function == "init" {
+		return s.Init(APIstub)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
 }
 
 /*
- *  donate方法，即捐赠方法，需要指定转出方(args[0])、转出方(args[1])和金额(args[2])
+ *  donate方法，即捐赠方法，需要指定转出方(args[0])、转出方(args[1])和金额(args[2]),备注
  */
 func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if len(args) != 4 {
@@ -284,7 +288,7 @@ func (s *SmartContract) record(APIstub shim.ChaincodeStubInterface, args []strin
 /*
  *  指定日期区间查询用户的交易记录，输入参数为用户ID（args[0]），开始日期（args[1]），结束日期（args[2]）
  */
-func (s *SmartContract) recordByDate(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (s *SmartContract) inAndOut(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if len(args) != 3 {
 		return shim.Error("Query Income And Expense By Date Failed: Incorrect number of arguments. Expecting 3")
 	}
@@ -474,6 +478,45 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString(`]}`)
+	return shim.Success(buffer.Bytes())
+}
+
+/*
+ *  指定日期区间查询用户的交易记录，输入参数为转出方ID（args[0]），转入方（args[1]），开始日期（args[2]），结束日期（args[3]）
+ */
+func (s *SmartContract) recordByCondition(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if len(args) != 4 {
+		return shim.Error("Query Record Failed: Incorrect number of arguments. Expecting 4")
+	}
+
+	startTime, _ := time.Parse("2006-01-02 15:04:05", args[2])
+	endTime, _ := time.Parse("2006-01-02 15:04:05", args[3])
+	queryString := fmt.Sprintf(`{"selector": {"from": {"$regex": "%v"},"to": {"$regex": "%v"},"timestamp": {"$gt": %v, "$lt": %v}}}`, args[0], args[1], startTime.Unix(), endTime.Unix())
+
+	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
+	if queryErr != nil {
+		fmt.Println("Query Record Failed:" + queryErr.Error())
+		return shim.Error(queryErr.Error())
+	}
+	defer recordAsBytes.Close() //释放迭代器
+
+	var buffer bytes.Buffer
+	bArrayMemberAlreadyWritten := false
+	buffer.WriteString(`{"records":[`)
+
+	for recordAsBytes.HasNext() {
+		queryResponse, err := recordAsBytes.Next()
+		if err != nil {
+			return shim.Error("Query Record Failed:" + err.Error())
+		}
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString(string(queryResponse.Value))
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString(`]}`)
+	fmt.Print("Record Query Result: %s", buffer.String())
 	return shim.Success(buffer.Bytes())
 }
 
