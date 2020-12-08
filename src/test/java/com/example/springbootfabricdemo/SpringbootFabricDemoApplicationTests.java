@@ -2,20 +2,14 @@ package com.example.springbootfabricdemo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.TypeReference;
 import com.example.springbootfabricdemo.config.FabricConfig;
-import com.example.springbootfabricdemo.dto.fabric.req.FinLocQuery;
 import com.example.springbootfabricdemo.entity.fabric.AccountInfo;
 import com.example.springbootfabricdemo.entity.fabric.TxInfo;
 import com.example.springbootfabricdemo.fabric.FabricComponent;
-import org.apache.commons.beanutils.BeanUtils;
-import org.hyperledger.fabric.gateway.Contract;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.*;
 
