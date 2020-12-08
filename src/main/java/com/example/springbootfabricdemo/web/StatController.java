@@ -11,11 +11,11 @@ public class StatController {
 
     /**
      * 获取指定时间范围内用户的交易统计信息
-     * @param finLocQuery
+     * @param walletQuery
      * @return
      */
     @GetMapping("/filter")
-    public Response<User> getAccountInfo(@RequestBody WalletQuery finLocQuery) {
+    public Response<User> getAccountInfo(@RequestBody WalletQuery walletQuery) {
 
         return Response.newSuccInstance(new User());
     }
