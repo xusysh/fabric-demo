@@ -8,8 +8,8 @@ import lombok.Data;
 @Data
 public class FinLocInfo {
 
-    String targetId;
+    String TargetId;
 
-    Double balance;
+    Double Amount;
 
 }

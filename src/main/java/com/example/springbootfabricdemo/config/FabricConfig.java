@@ -16,13 +16,14 @@ import java.util.Properties;
 
 @Configuration
 @Getter
-@ConfigurationProperties(prefix = "mytest.user")
+@ConfigurationProperties(prefix = "demo.fabric")
 public class FabricConfig {
 
     String configPath = "fabric/config/";
 
     String walletPath = "fabric/wallet/";
 
+    String userId = "user1";
     String orgName = "Org1";
 
     String channelName = "mychannel";

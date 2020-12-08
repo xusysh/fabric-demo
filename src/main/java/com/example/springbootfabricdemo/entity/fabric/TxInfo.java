@@ -61,11 +61,11 @@ public class TxInfo {
     /**
      * 交易标记
      */
-    String remark;
+    String Remark;
 
     /**
      * 备注
      */
-    String comment;
+    String Comment;
 
 }

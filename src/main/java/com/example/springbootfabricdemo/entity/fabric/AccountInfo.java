@@ -14,14 +14,16 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class AccountInfo {
 
-    String id;
+    String Id;
 
-    String username;
+    String UserId;
 
-    String password;
+    String Name;
 
-    String balance;
+    String Password;
 
-    String orgId;
+    String Balance;
+
+    String OrgId;
 
 }
