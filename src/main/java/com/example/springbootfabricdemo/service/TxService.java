@@ -15,13 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @Service
-@RequestMapping("/tx")
 public class TxService {
 
     @Autowired
     FabricComponent fabricComponent;
 
-    @PostMapping("/transfer")
     public List<TxInfo> transfer(@RequestBody TxSubmit txSubmit) throws Exception {
         // todo: app用户映射到fabric用户
         String resultStr = fabricComponent.invokeQuery(

@@ -16,7 +16,7 @@ public class StatController {
      */
     @GetMapping("/filter")
     public Response<User> getAccountInfo(@RequestBody WalletQuery walletQuery) {
-
+        walletQuery.getUserId();
         return Response.newSuccInstance(new User());
     }
 

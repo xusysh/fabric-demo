@@ -16,13 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @Service
-@RequestMapping("/account")
 public class AccountService {
 
     @Autowired
     FabricComponent fabricComponent;
 
-    @GetMapping("/account")
     public User getAccountInfo(String userId) throws Exception {
         String resultStr = fabricComponent.invokeQuery(
                 "user1", "wallet", userId);
@@ -30,8 +28,6 @@ public class AccountService {
         return null;
     }
 
-
-    @PostMapping("/transfer")
     public List<TxInfo> queryTxInfo(@RequestBody TxQuery txQuery) throws Exception {
         // todo: app用户映射到fabric用户
         fabricComponent.invokeQuery(
