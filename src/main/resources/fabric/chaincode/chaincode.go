@@ -411,7 +411,8 @@ func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [8]s
 	if len(args) != 8 {
 		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 8")
 	}
-	t := time.Now()
+	l, _ := time.LoadLocation("Asia/Shanghai")
+	t := time.Now().In(l)
 	var timeLayoutStr = "2006-01-02 15:04:05" //go中的时间格式化必须是这个时间
 	curTime := t.Format(timeLayoutStr)
 	money, _ := strconv.ParseFloat(args[2], 64)
