@@ -258,7 +258,7 @@ func (s *SmartContract) record(APIstub shim.ChaincodeStubInterface, args []strin
 		return shim.Error("Query Record Failed: Incorrect number of arguments. Expecting 1")
 	}
 	//	 querySql := "{\"selector\": {\"from\": \"" + args[0] + "\"}}"
-	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": "%v"},{"to": "%v"}]}}`, args[0], args[0])
+	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": "%v"},{"to": "%v"}]}, "sort": [{"timestamp": "asc"}]}`, args[0], args[0])
 
 	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
 	if queryErr != nil {
@@ -295,7 +295,7 @@ func (s *SmartContract) inAndOut(APIstub shim.ChaincodeStubInterface, args []str
 		return shim.Error("Query Income And Expense By Date Failed: Incorrect number of arguments. Expecting 3")
 	}
 
-	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": "%v"},{"to": "%v"}],"date": {"$gt": "%v","$lt": "%v"}}}`, args[0], args[0], args[1], args[2])
+	queryString := fmt.Sprintf(`{"selector": {"$or": [{"from": "%v"},{"to": "%v"}],"date": {"$gt": "%v","$lt": "%v"}}, "sort": [{"timestamp": "asc"}]}`, args[0], args[0], args[1], args[2])
 	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
 	if queryErr != nil {
 		fmt.Println("Query Income And Expense By Date Failed:" + queryErr.Error())
@@ -494,7 +494,7 @@ func (s *SmartContract) recordByCondition(APIstub shim.ChaincodeStubInterface, a
 	l, _ := time.LoadLocation("Asia/Shanghai")
 	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[2], l)
 	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[3], l)
-	queryString := fmt.Sprintf(`{"selector": {"from": {"$regex": "%v"},"to": {"$regex": "%v"},"timestamp": {"$gt": %v, "$lt": %v}}}`, args[0], args[1], startTime.Unix(), endTime.Unix())
+	queryString := fmt.Sprintf(`{"selector": {"from": {"$regex": "%v"},"to": {"$regex": "%v"},"timestamp": {"$gt": %v, "$lt": %v}}, "sort": [{"timestamp": "asc"}]}`, args[0], args[1], startTime.Unix(), endTime.Unix())
 
 	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
 	if queryErr != nil {
