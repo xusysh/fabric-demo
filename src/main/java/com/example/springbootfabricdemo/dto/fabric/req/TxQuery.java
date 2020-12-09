@@ -11,8 +11,8 @@ public class TxQuery {
 
     String targetId;
 
-    Date startTime;
+    String startTime;
 
-    Date endTime;
+    String endTime;
 
 }

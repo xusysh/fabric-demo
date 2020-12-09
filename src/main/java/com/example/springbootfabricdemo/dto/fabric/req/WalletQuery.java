@@ -16,8 +16,8 @@ public class WalletQuery {
 
     String userId;
 
-    Date startTime;
+    String startTime;
 
-    Date endTime;
+    String endTime;
 
 }

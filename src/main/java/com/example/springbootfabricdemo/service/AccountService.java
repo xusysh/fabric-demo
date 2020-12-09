@@ -6,6 +6,7 @@ import com.example.springbootfabricdemo.entity.User;
 import com.example.springbootfabricdemo.entity.fabric.AccountInfo;
 import com.example.springbootfabricdemo.entity.fabric.TxInfo;
 import com.example.springbootfabricdemo.fabric.FabricComponent;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +22,11 @@ public class AccountService {
     @Autowired
     FabricComponent fabricComponent;
 
-    public User getAccountInfo(String userId) throws Exception {
+    public AccountInfo getAccountInfo(String userId) throws Exception {
         String resultStr = fabricComponent.invokeQuery(
                 "user1", "wallet", userId);
         AccountInfo accountInfo = JSON.parseObject(resultStr, AccountInfo.class);
-        return null;
+        return accountInfo;
     }
 
     public List<TxInfo> queryTxInfo(@RequestBody TxQuery txQuery) throws Exception {

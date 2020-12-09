@@ -8,12 +8,12 @@ import lombok.Data;
 @Data
 public class FinInfo {
 
-    String date;
+    String Date;
 
-    Double income;
+    Double Income;
 
-    Double expense;
+    Double Expense;
 
-    Double total;
+    Double TotalBalance;
 
 }
