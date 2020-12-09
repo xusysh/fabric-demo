@@ -110,6 +110,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.fundFlow(APIstub, args)
 	} else if function == "recordByCondition" {
 		return s.recordByCondition(APIstub, args)
+	} else if function == "purse" {
+		return s.findPurses(APIstub, args)
 	} else if function == "init" {
 		return s.Init(APIstub)
 	}
@@ -489,9 +491,9 @@ func (s *SmartContract) recordByCondition(APIstub shim.ChaincodeStubInterface, a
 	if len(args) != 4 {
 		return shim.Error("Query Record Failed: Incorrect number of arguments. Expecting 4")
 	}
-
-	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[2], time.Local)
-	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[3], time.Local)
+	l, _ := time.LoadLocation("Asia/Shanghai")
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[2], l)
+	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[3], l)
 	queryString := fmt.Sprintf(`{"selector": {"from": {"$regex": "%v"},"to": {"$regex": "%v"},"timestamp": {"$gt": %v, "$lt": %v}}}`, args[0], args[1], startTime.Unix(), endTime.Unix())
 
 	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
@@ -518,6 +520,43 @@ func (s *SmartContract) recordByCondition(APIstub shim.ChaincodeStubInterface, a
 	}
 	buffer.WriteString(`]}`)
 	fmt.Print("Record Query Result: %s", buffer.String())
+	return shim.Success(buffer.Bytes())
+}
+
+/*
+ *  查询用户名下所有钱包，输入参数为用户id
+ */
+func (s *SmartContract) findPurses(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if len(args) != 1 {
+		return shim.Error("Query Purses Failed: Incorrect number of arguments. Expecting 1")
+	}
+
+	queryString := fmt.Sprintf(`{"selector": {"userId": {"$regex": "%v"}, "parentId": {"$regex" : ".*"}}}`, args[0])
+
+	purseAsBytes, queryErr := APIstub.GetQueryResult(queryString)
+	if queryErr != nil {
+		fmt.Println("Query Purses Failed:" + queryErr.Error())
+		return shim.Error(queryErr.Error())
+	}
+	defer purseAsBytes.Close() //释放迭代器
+
+	var buffer bytes.Buffer
+	bArrayMemberAlreadyWritten := false
+	buffer.WriteString(`{"purses":[`)
+
+	for purseAsBytes.HasNext() {
+		queryResponse, err := purseAsBytes.Next()
+		if err != nil {
+			return shim.Error("Query Purses Failed:" + err.Error())
+		}
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString(string(queryResponse.Value))
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString(`]}`)
+	fmt.Print("Purses Query Result: %s", buffer.String())
 	return shim.Success(buffer.Bytes())
 }
 
