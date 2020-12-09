@@ -490,8 +490,8 @@ func (s *SmartContract) recordByCondition(APIstub shim.ChaincodeStubInterface, a
 		return shim.Error("Query Record Failed: Incorrect number of arguments. Expecting 4")
 	}
 
-	startTime, _ := time.Parse("2006-01-02 15:04:05", args[2])
-	endTime, _ := time.Parse("2006-01-02 15:04:05", args[3])
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[2], time.Local)
+	endTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[3], time.Local)
 	queryString := fmt.Sprintf(`{"selector": {"from": {"$regex": "%v"},"to": {"$regex": "%v"},"timestamp": {"$gt": %v, "$lt": %v}}}`, args[0], args[1], startTime.Unix(), endTime.Unix())
 
 	recordAsBytes, queryErr := APIstub.GetQueryResult(queryString)
