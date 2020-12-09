@@ -36,10 +36,10 @@ public class StatService {
         return finInfoList;
     }
 
-    public List<FinLocInfo> getFinLocInfo(FinLocQuery finLocQuery) throws Exception {
-        String resultStr = fabricComponent.invokeQuery(fabricConfig.getUserId(),"flow",finLocQuery.getUserId());
+    public List<FinLocInfo> getFinLocInfo(String userId) throws Exception {
+        String resultStr = fabricComponent.invokeQuery(fabricConfig.getUserId(),"flow",userId);
         Map<String, JSONArray> resultMap = JSON.parseObject(resultStr,Map.class);
-        JSONArray records = resultMap.get("records");
+        JSONArray records = resultMap.get("flows");
         List<FinLocInfo> FinLocInfoList = records.toJavaList(FinLocInfo.class);
         return FinLocInfoList;
     }
