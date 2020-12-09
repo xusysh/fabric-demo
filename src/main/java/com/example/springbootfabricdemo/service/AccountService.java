@@ -1,10 +1,12 @@
 package com.example.springbootfabricdemo.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.example.springbootfabricdemo.config.FabricConfig;
 import com.example.springbootfabricdemo.dto.fabric.req.TxQuery;
 import com.example.springbootfabricdemo.entity.User;
 import com.example.springbootfabricdemo.entity.fabric.AccountInfo;
+import com.example.springbootfabricdemo.entity.fabric.PurseInfo;
 import com.example.springbootfabricdemo.entity.fabric.TxInfo;
 import com.example.springbootfabricdemo.fabric.FabricComponent;
 import lombok.AllArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AccountService {
@@ -38,6 +41,15 @@ public class AccountService {
         fabricComponent.invokeQuery(
                 fabricConfig.getUserId(), "wallet", txQuery.getSourceId());
         return null;
+    }
+
+    public List<PurseInfo> getAccountPurseInfo(String userId) throws Exception {
+        String resultStr = fabricComponent.invokeQuery(
+                fabricConfig.getUserId(), "purse", userId);
+        Map<String, JSONArray> resultMap = JSON.parseObject(resultStr, Map.class);
+        JSONArray records = resultMap.get("purses");
+        List<PurseInfo> purseInfoList = records.toJavaList(PurseInfo.class);
+        return purseInfoList;
     }
 
 }
