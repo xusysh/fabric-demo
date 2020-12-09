@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.beanutils.BeanUtils;
@@ -34,6 +35,10 @@ public class FabricComponent {
 
     @Autowired
     HFCAClient caClient;
+
+    Gateway gateway = null;
+
+    Contract contract = null;
 
     public void enrollAdmin(String userId, String passwd) throws Exception {
         Wallet wallet = fabricConfig.getWallet();
@@ -87,12 +92,16 @@ public class FabricComponent {
     private Contract getNetworkAndContract(String userId) throws Exception {
         //todo:直接根据userId找到orgId
         String orgId = "Org1";
-        Builder builder = this.getGatewayBuilder(userId, orgId);
         // create a gateway connection
-        Gateway gateway = builder.connect();
+        if(Objects.isNull(gateway)) {
+            Builder builder = this.getGatewayBuilder(userId, orgId);
+            gateway = builder.connect();
+        }
         // get the network and contract
         Network network = gateway.getNetwork(fabricConfig.getChannelName());
-        Contract contract = network.getContract(fabricConfig.getChaincodeName());
+        if(Objects.isNull(contract)) {
+            contract = network.getContract(fabricConfig.getChaincodeName());
+        }
         return contract;
     }
 

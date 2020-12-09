@@ -23,7 +23,7 @@ public class FabricConfig {
 
     String walletPath = "fabric/wallet/";
 
-    String userId = "user1";
+    String userId = "user111";
     String orgName = "Org1";
 
     String channelName = "mychannel";

@@ -15,4 +15,6 @@ public class TxSubmit {
 
     String amount;
 
+    String comment;
+
 }

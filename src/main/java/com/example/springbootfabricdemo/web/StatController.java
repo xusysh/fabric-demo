@@ -33,12 +33,12 @@ public class StatController {
 
     /**
      * 获取指定时间范围内用户的资金流向统计信息
-     * @param finLocQuery
+     * @param userId
      * @return
      */
-    @PostMapping("/fin-loc-info")
-    public Response<List<FinLocInfo>> getFinInfo(@RequestBody FinLocQuery finLocQuery) throws Exception {
-        List<FinLocInfo> finLocInfoList = statService.getFinLocInfo(finLocQuery);
+    @GetMapping("/fin-loc-info/{userId}")
+    public Response<List<FinLocInfo>> getFinInfo(@PathVariable("userId")String userId) throws Exception {
+        List<FinLocInfo> finLocInfoList = statService.getFinLocInfo(userId);
         return Response.newSuccInstance(finLocInfoList);
     }
 
