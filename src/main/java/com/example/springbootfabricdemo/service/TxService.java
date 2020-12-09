@@ -29,8 +29,8 @@ public class TxService {
 
     public AccountInfo transfer(TxSubmit txSubmit) throws Exception {
         // todo: app用户映射到fabric用户
-        String resultStr = fabricComponent.invokeQuery(
-                fabricConfig.getUserId(), "donate", txSubmit.getUserId(), txSubmit.getTargetId(), txSubmit.getAmount());
+        String resultStr = fabricComponent.invokeTx(
+                fabricConfig.getUserId(), "donate", txSubmit.getUserId(), txSubmit.getTargetId(), txSubmit.getAmount(), txSubmit.getComment());
 //        AccountInfo accountInfo = JSON.parseObject(resultStr, AccountInfo.class);
         return null;
     }
@@ -39,6 +39,16 @@ public class TxService {
         // todo: app用户映射到fabric用户
         String resultStr = fabricComponent.invokeQuery(
                 fabricConfig.getUserId(), "recordByCondition", txQuery.getSourceId(), txQuery.getTargetId(), txQuery.getStartTime(), txQuery.getEndTime());
+        Map<String, JSONArray> resultMap = JSON.parseObject(resultStr,Map.class);
+        JSONArray records = resultMap.get("records");
+        List<TxInfo> txInfoList = records.toJavaList(TxInfo.class);
+        return txInfoList;
+    }
+
+    public List<TxInfo> filterUser(String userId) throws Exception {
+        // todo: app用户映射到fabric用户
+        String resultStr = fabricComponent.invokeQuery(
+                fabricConfig.getUserId(), "record", userId);
         Map<String, JSONArray> resultMap = JSON.parseObject(resultStr,Map.class);
         JSONArray records = resultMap.get("records");
         List<TxInfo> txInfoList = records.toJavaList(TxInfo.class);

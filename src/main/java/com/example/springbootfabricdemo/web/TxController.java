@@ -24,7 +24,7 @@ public class TxController {
      * @param txSubmit
      * @return
      */
-    @PostMapping("/transfer")
+    @PostMapping("/submit")
     public Response<AccountInfo> transfer(@RequestBody TxSubmit txSubmit) throws Exception {
         AccountInfo accountInfo = txService.transfer(txSubmit);
         return Response.newSuccInstance(accountInfo);
@@ -38,6 +38,17 @@ public class TxController {
     @PostMapping("/filter")
     public Response<List<TxInfo>> filterTxInfo(@RequestBody TxQuery txQuery) throws Exception {
         List<TxInfo> txInfoList = txService.filter(txQuery);
+        return Response.newSuccInstance(txInfoList);
+    }
+
+    /**
+     * 筛选指定用户的所有交易信息
+     * @param userId
+     * @return
+     */
+    @GetMapping("/filter/{userId}")
+    public Response<List<TxInfo>> filterTxInfo(@PathVariable("userId") String userId) throws Exception {
+        List<TxInfo> txInfoList = txService.filterUser(userId);
         return Response.newSuccInstance(txInfoList);
     }
 

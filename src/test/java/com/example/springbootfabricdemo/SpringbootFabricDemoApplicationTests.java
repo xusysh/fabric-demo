@@ -33,7 +33,7 @@ class SpringbootFabricDemoApplicationTests {
     @Autowired
     FabricConfig fabricConfig;
 
-    String userId = "user111";
+    String userId = "user112";
     String orgId = "Org1";
 
 
@@ -61,15 +61,15 @@ class SpringbootFabricDemoApplicationTests {
         fabricComponent.enrollAdmin("admin", "adminpw");
         fabricComponent.registerUser(userId, "Org1");
         // 查询余额
-        String resp = fabricComponent.invokeQuery(userId, "wallet", "zhuhao2.js");
-        System.out.println(resp);
-        // 查询交易记录
-        resp = fabricComponent.invokeQuery(userId, "record", "zhuhao2.js");
-        System.out.println(resp);
-        List<TxInfo> emm = JSON.parseArray(resp, TxInfo.class);
-        // 转账
-        resp = fabricComponent.invokeTx(userId, "donate", "zhuhao2.js", "guojingyu.js", "1");
-        System.out.println(resp);
+//        String resp = fabricComponent.invokeQuery(userId, "wallet", "zhuhao2.js");
+//        System.out.println(resp);
+//        // 查询交易记录
+//        resp = fabricComponent.invokeQuery(userId, "record", "zhuhao2.js");
+//        System.out.println(resp);
+//        List<TxInfo> emm = JSON.parseArray(resp, TxInfo.class);
+//        // 转账
+//        resp = fabricComponent.invokeTx(userId, "donate", "zhuhao2.js", "guojingyu.js", "1");
+//        System.out.println(resp);
 //        this.registerUser("user107","Org1");
     }
 
