@@ -9,7 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -38,7 +37,7 @@ public class FabricConfig {
     public HFCAClient HFCAClient() throws Exception {
         // Create a CA client for interacting with the CA.
         Properties props = new Properties();
-        Path pemFilePath = Paths.get(this.getClass().getClassLoader().getResource(this.configPath + this.caName + "-cert.pem").toURI());
+        Path pemFilePath = Paths.get(this.configPath + this.caName + "-cert.pem");
         props.put("pemFile", pemFilePath.toString());
 //        props.put("pemFile", Paths.get(this.configPath + this.caName + "-cert.pem"));
         props.put("allowAllHostNames", "true");
@@ -49,8 +48,7 @@ public class FabricConfig {
     }
 
     public Wallet getWallet() throws Exception {
-//        URI walletURI = this.getClass().getClassLoader().getResource(walletPath).toURI();
-        Path walletPath = Paths.get("wallet");
+        Path walletPath = Paths.get(this.walletPath);
         Wallet wallet = Wallet.createFileSystemWallet(walletPath);
         return wallet;
     }
