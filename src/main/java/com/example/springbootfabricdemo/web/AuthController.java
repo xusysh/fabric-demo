@@ -30,7 +30,7 @@ public class AuthController {
      */
     @PostMapping("/register-user")
     public Response<Void> registerUser(@RequestBody RegisterUserReq registerUserReq) throws Exception {
-        authService.enrollAdmin(registerUserReq.getUid(),registerUserReq.getOrgId());
+        authService.registerUser(registerUserReq.getUid());
         return Response.newSuccInstance(null);
     }
 

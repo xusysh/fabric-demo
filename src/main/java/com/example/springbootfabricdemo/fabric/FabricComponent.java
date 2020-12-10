@@ -58,7 +58,7 @@ public class FabricComponent {
         System.out.println("Successfully enrolled user \"admin\" and imported it into the wallet");
     }
 
-    public void registerUser(String userId, String orgId) throws Exception {
+    public void registerUser(String userId) throws Exception {
         Wallet wallet = fabricConfig.getWallet();
         boolean userExists = wallet.exists(userId);
         if (userExists) {
@@ -72,7 +72,7 @@ public class FabricComponent {
         registrationRequest.setEnrollmentID(userId);
         String enrollmentSecret = caClient.register(registrationRequest, admin);
         Enrollment enrollment = caClient.enroll(userId, enrollmentSecret);
-        Identity user = Identity.createIdentity(orgId + "MSP", enrollment.getCert(), enrollment.getKey());
+        Identity user = Identity.createIdentity(fabricConfig.getOrgName() + "MSP", enrollment.getCert(), enrollment.getKey());
         wallet.put(userId, user);
         System.out.println("Successfully enrolled user " + userId + " and imported it into the wallet");
     }
@@ -91,7 +91,7 @@ public class FabricComponent {
 
     private Contract getNetworkAndContract(String userId) throws Exception {
         //todo:直接根据userId找到orgId
-        String orgId = "Org3";
+        String orgId = fabricConfig.getOrgName();
         // create a gateway connection
         if (Objects.isNull(gateway)) {
             Builder builder = this.getGatewayBuilder(userId, orgId);
@@ -137,7 +137,7 @@ public class FabricComponent {
 
             @Override
             public String getAffiliation() {
-                return "org3.department1";
+                return fabricConfig.getOrgName().toLowerCase() + ".department1";
             }
 
             @Override
@@ -158,7 +158,7 @@ public class FabricComponent {
 
             @Override
             public String getMspId() {
-                return "Org3MSP";
+                return fabricConfig.getOrgName() + "MSP";
             }
 
         };

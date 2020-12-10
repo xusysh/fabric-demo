@@ -59,7 +59,7 @@ class SpringbootFabricDemoApplicationTests {
     void contextLoads() throws Exception {
 
         fabricComponent.enrollAdmin("admin", "adminpw");
-        fabricComponent.registerUser(userId, "Org1");
+        fabricComponent.registerUser(userId);
         // 查询余额
 //        String resp = fabricComponent.invokeQuery(userId, "wallet", "zhuhao2.js");
 //        System.out.println(resp);

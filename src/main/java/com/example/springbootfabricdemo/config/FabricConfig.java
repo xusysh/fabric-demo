@@ -22,16 +22,16 @@ public class FabricConfig {
 
     String walletPath = "fabric/wallet/";
 
-    String userId = "user111";
-    String orgName = "Org3";
+    String userId = "user222";
+    String orgName = "Org1";
 
     String channelName = "mychannel";
 
     String chaincodeName = "mycc";
 
-    String caName = "ca.org3.ccb.com";
+    String caName = "ca.org1.ccb.com";
 
-    String caUrl = "https://47.116.140.61:7054";
+    String caUrl = "https://106.15.193.9:7054";
 
     @Bean
     public HFCAClient HFCAClient() throws Exception {

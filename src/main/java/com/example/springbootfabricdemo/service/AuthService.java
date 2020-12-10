@@ -23,8 +23,8 @@ public class AuthService {
      * 注册用户
      * @return
      */
-    public void registerUser(String uid,String orgId) throws Exception {
-        fabricComponent.registerUser(uid,orgId);
+    public void registerUser(String uid) throws Exception {
+        fabricComponent.registerUser(uid);
     }
 
 }
