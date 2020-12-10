@@ -31,7 +31,7 @@ public class FabricConfig {
 
     String caName = "ca.org3.ccb.com";
 
-    String caUrl = "https://106.15.193.9:7054";
+    String caUrl = "https://47.116.140.61:7054";
 
     @Bean
     public HFCAClient HFCAClient() throws Exception {
