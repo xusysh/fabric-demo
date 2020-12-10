@@ -9,6 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * 账号信息
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
