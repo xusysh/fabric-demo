@@ -91,7 +91,7 @@ public class FabricComponent {
 
     private Contract getNetworkAndContract(String userId) throws Exception {
         //todo:直接根据userId找到orgId
-        String orgId = "Org1";
+        String orgId = "Org3";
         // create a gateway connection
         if (Objects.isNull(gateway)) {
             Builder builder = this.getGatewayBuilder(userId, orgId);
@@ -137,7 +137,7 @@ public class FabricComponent {
 
             @Override
             public String getAffiliation() {
-                return "org1.department1";
+                return "org3.department1";
             }
 
             @Override
@@ -158,7 +158,7 @@ public class FabricComponent {
 
             @Override
             public String getMspId() {
-                return "Org1MSP";
+                return "Org3MSP";
             }
 
         };

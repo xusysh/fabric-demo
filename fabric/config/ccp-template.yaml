@@ -16,21 +16,6 @@ organizations:
     certificateAuthorities:
     - ca
 
-channels:
-  mychannel:
-    orderers:
-      - orderer${ORG}.ccb.com
-    peers:
-      peer0.org${ORG}.ccb.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
-      peer1.org${ORG}.ccb.com:
-        endorsingPeer: true
-        chaincodeQuery: true
-        ledgerQuery: true
-        eventSource: true
 
 orderers:
   orderer${ORG}.ccb.com:
