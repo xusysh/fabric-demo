@@ -93,13 +93,13 @@ public class FabricComponent {
         //todo:直接根据userId找到orgId
         String orgId = "Org1";
         // create a gateway connection
-        if(Objects.isNull(gateway)) {
+        if (Objects.isNull(gateway)) {
             Builder builder = this.getGatewayBuilder(userId, orgId);
             gateway = builder.connect();
         }
         // get the network and contract
         Network network = gateway.getNetwork(fabricConfig.getChannelName());
-        if(Objects.isNull(contract)) {
+        if (Objects.isNull(contract)) {
             contract = network.getContract(fabricConfig.getChaincodeName());
         }
         return contract;
@@ -109,8 +109,7 @@ public class FabricComponent {
         // Load a file system based wallet for managing identities.
         Wallet wallet = fabricConfig.getWallet();
         // load a CCP
-        Path networkConfigPath = Paths.get(
-                this.getClass().getClassLoader().getResource(fabricConfig.getConfigPath() + "connection-" + orgId + ".yaml").toURI());
+        Path networkConfigPath = Paths.get(fabricConfig.getConfigPath() + "connection-" + orgId + ".yaml");
         Gateway.Builder builder = Gateway.createBuilder();
         builder.identity(wallet, userId).networkConfig(networkConfigPath).discovery(true);
         return builder;

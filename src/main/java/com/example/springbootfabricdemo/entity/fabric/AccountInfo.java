@@ -20,7 +20,7 @@ public class AccountInfo {
 
     String Name;
 
-    String Password;
+//    String Password;
 
     String Balance;
 
