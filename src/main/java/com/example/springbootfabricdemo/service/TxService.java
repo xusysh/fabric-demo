@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TxService {
@@ -39,7 +39,7 @@ public class TxService {
         // todo: app用户映射到fabric用户
         String resultStr = fabricComponent.invokeQuery(
                 fabricConfig.getUserId(), "recordByCondition", txQuery.getSourceId(), txQuery.getTargetId(), txQuery.getStartTime(), txQuery.getEndTime());
-        Map<String, JSONArray> resultMap = JSON.parseObject(resultStr,Map.class);
+        Map<String, JSONArray> resultMap = JSON.parseObject(resultStr, Map.class);
         JSONArray records = resultMap.get("records");
         List<TxInfo> txInfoList = records.toJavaList(TxInfo.class);
         return txInfoList;
@@ -49,10 +49,21 @@ public class TxService {
         // todo: app用户映射到fabric用户
         String resultStr = fabricComponent.invokeQuery(
                 fabricConfig.getUserId(), "record", userId);
-        Map<String, JSONArray> resultMap = JSON.parseObject(resultStr,Map.class);
+        Map<String, JSONArray> resultMap = JSON.parseObject(resultStr, Map.class);
         JSONArray records = resultMap.get("records");
         List<TxInfo> txInfoList = records.toJavaList(TxInfo.class);
-        return txInfoList;
+        Map<String, List<TxInfo>> userTxInfo = txInfoList.stream().collect(Collectors.groupingBy(TxInfo::getRemark));
+        //todo:merge
+        List<TxInfo> userTxInfoList = txInfoList;
+//        userTxInfo.values().stream().map(txInfos -> {
+//            if(txInfos.size() == 1) return txInfos.get(0);
+//            else {
+//                txInfos.stream().
+//            }
+//        });
+        //数组里的数两两组合比较，按照比较值更得的顺序升序排序
+        userTxInfoList.sort(Comparator.comparing(TxInfo::getTimestamp).reversed());
+        return userTxInfoList;
     }
 
 }
