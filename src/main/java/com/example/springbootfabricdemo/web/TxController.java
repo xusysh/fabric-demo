@@ -3,6 +3,7 @@ package com.example.springbootfabricdemo.web;
 import com.example.springbootfabricdemo.dto.fabric.req.TxQuery;
 import com.example.springbootfabricdemo.dto.fabric.req.TxSubmit;
 import com.example.springbootfabricdemo.dto.resp.Response;
+import com.example.springbootfabricdemo.dto.resp.UserTxInfo;
 import com.example.springbootfabricdemo.entity.User;
 import com.example.springbootfabricdemo.entity.fabric.AccountInfo;
 import com.example.springbootfabricdemo.entity.fabric.TxInfo;
@@ -47,8 +48,8 @@ public class TxController {
      * @return
      */
     @GetMapping("/filter/{userId}")
-    public Response<List<TxInfo>> filterTxInfo(@PathVariable("userId") String userId) throws Exception {
-        List<TxInfo> txInfoList = txService.filterUser(userId);
+    public Response<List<UserTxInfo>> filterTxInfo(@PathVariable("userId") String userId) throws Exception {
+        List<UserTxInfo> txInfoList = txService.filterUser(userId);
         return Response.newSuccInstance(txInfoList);
     }
 
