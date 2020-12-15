@@ -62,8 +62,8 @@ public class TxService {
             Boolean income = userId.equals(baseTxInfo.getTo());
             if(txInfos.size() > 1) {
                 baseTxInfo.setMoney(txInfos.stream().mapToDouble(TxInfo::getMoney).sum());
-                baseTxInfo.setFromBalance(txInfoList.stream().mapToDouble(TxInfo::getFromBalance).min().getAsDouble());
-                baseTxInfo.setToBalance(txInfoList.stream().mapToDouble(TxInfo::getToBalance).max().getAsDouble());
+                baseTxInfo.setFromBalance(txInfos.stream().mapToDouble(TxInfo::getFromBalance).min().getAsDouble());
+                baseTxInfo.setToBalance(txInfos.stream().mapToDouble(TxInfo::getToBalance).max().getAsDouble());
             }
             userTxInfoList.add(new UserTxInfo(
                     income ? "income":"outcome",
