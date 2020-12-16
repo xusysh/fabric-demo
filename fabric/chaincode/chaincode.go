@@ -39,6 +39,7 @@ type Record struct {
 	ToBalance   float64 `json:"tobalance"`
 	Comment     string  `json:"comment"`
 	Remark      string  `json:"remark"`
+	Flag        string  `json:"flag"`
 }
 
 // 收支情况
@@ -120,11 +121,11 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 }
 
 /*
- *  donate方法，即捐赠方法，需要指定转出方(args[0])、转出方(args[1])和金额(args[2]),备注
+ *  donate方法，即捐赠方法，需要指定转出方(args[0])、转入方(args[1])、金额(args[2])、备注(args[3])和是否匿名(args[4])
  */
 func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if len(args) != 4 {
-		return shim.Error("Donate Money Failed: Incorrect number of arguments. Expecting 4")
+	if len(args) != 5 {
+		return shim.Error("Donate Money Failed: Incorrect number of arguments. Expecting 5")
 	}
 
 	// 1.判断转出方用户是否存在
@@ -155,8 +156,8 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 	originalToBalance := accountToJson.Balance
 
 	// 4.执行转账交易
-	accountFromJson.Balance -= money
-	accountToJson.Balance += money
+	accountFromJson.Balance, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", accountFromJson.Balance-money), 64)
+	accountToJson.Balance, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", accountToJson.Balance+money), 64)
 	accountFrom, _ = json.Marshal(accountFromJson)
 	accountTo, _ = json.Marshal(accountToJson)
 	// 4.1 转出方account信息更新
@@ -169,7 +170,7 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 	toUpdateErr := APIstub.PutState(args[1], accountTo)
 	if toUpdateErr != nil {
 		// 4.2.1 如果发生故障，进行回退
-		accountFromJson.Balance += money
+		accountFromJson.Balance, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", accountFromJson.Balance+money), 64)
 		accountFrom, _ = json.Marshal(accountFromJson)
 		APIstub.PutState(args[0], accountFrom)
 		fmt.Println("Donate Money Failed" + toUpdateErr.Error())
@@ -194,10 +195,10 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		json.Unmarshal(purseRes.Value, &purseTemp)
 		curMoney := i
 		if purseTemp.Balance >= i {
-			purseTemp.Balance = purseTemp.Balance - i
+			purseTemp.Balance, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", purseTemp.Balance-i), 64)
 			i = 0
 		} else {
-			i = i - purseTemp.Balance
+			i, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", i-purseTemp.Balance), 64)
 			curMoney = purseTemp.Balance
 			purseTemp.Balance = 0
 		}
@@ -214,17 +215,22 @@ func (s *SmartContract) donate(APIstub shim.ChaincodeStubInterface, args []strin
 		purseNew, _ := json.Marshal(purse)
 		APIstub.PutState(purse.Id, purseNew)
 		// 4.5 增加交易记录
-		var argsnew [8]string
+		var argsnew [9]string
 		argsnew[0] = args[0]
 		argsnew[1] = args[1]
-		argsnew[2] = strconv.FormatFloat(curMoney, 'E', -1, 64)
+		argsnew[2] = strconv.FormatFloat(curMoney, 'f', 2, 64)
 		argsnew[3] = purse.Id
 		originalFromBalance = originalFromBalance - curMoney
 		originalToBalance = originalToBalance + curMoney
-		argsnew[4] = strconv.FormatFloat(originalFromBalance, 'E', -1, 64)
-		argsnew[5] = strconv.FormatFloat(originalToBalance, 'E', -1, 64)
+		argsnew[4] = strconv.FormatFloat(originalFromBalance, 'f', 2, 64)
+		argsnew[5] = strconv.FormatFloat(originalToBalance, 'f', 2, 64)
 		argsnew[6] = args[3]
 		argsnew[7] = remark
+		if args[0] == "gonghui.js" {
+			argsnew[8] = "0"
+		} else {
+			argsnew[8] = args[4]
+		}
 		s.addRecord(APIstub, argsnew)
 		if i == 0 {
 			break
@@ -251,7 +257,7 @@ func (s *SmartContract) wallet(APIstub shim.ChaincodeStubInterface, args []strin
 }
 
 /*
- *  record方法，即查看交易记录方法，需要指定用户ID
+ *  record方法，即查看交易记录方法，需要指定用户ID(args[0])
  */
 func (s *SmartContract) record(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if len(args) != 1 {
@@ -276,10 +282,16 @@ func (s *SmartContract) record(APIstub shim.ChaincodeStubInterface, args []strin
 		if err != nil {
 			return shim.Error("Query Record Failed:" + err.Error())
 		}
+		record := Record{}
+		json.Unmarshal(queryResponse.Value, &record)
+		if record.Flag != "0" && record.From != args[0] {
+			record.From = "***"
+		}
+		res, _ := json.Marshal(record)
 		if bArrayMemberAlreadyWritten == true {
 			buffer.WriteString(",")
 		}
-		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString(string(res))
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString(`]}`)
@@ -320,17 +332,17 @@ func (s *SmartContract) inAndOut(APIstub shim.ChaincodeStubInterface, args []str
 		if record.To == args[0] {
 			if _, ok := countIncome[record.Date]; ok {
 				curMoney, _ := strconv.ParseFloat(countIncome[record.Date], 64)
-				countIncome[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
+				countIncome[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'f', 2, 64)
 			} else {
-				countIncome[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
+				countIncome[record.Date] = strconv.FormatFloat(record.Money, 'f', 2, 64)
 			}
 		} else {
 			// 支出
 			if _, ok := countExpense[record.Date]; ok {
 				curMoney, _ := strconv.ParseFloat(countExpense[record.Date], 64)
-				countExpense[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'E', -1, 64)
+				countExpense[record.Date] = strconv.FormatFloat(curMoney+record.Money, 'f', 2, 64)
 			} else {
-				countExpense[record.Date] = strconv.FormatFloat(record.Money, 'E', -1, 64)
+				countExpense[record.Date] = strconv.FormatFloat(record.Money, 'f', 2, 64)
 			}
 		}
 		// 当日余额
@@ -338,18 +350,18 @@ func (s *SmartContract) inAndOut(APIstub shim.ChaincodeStubInterface, args []str
 			if record.Timestamp >= lastTime[record.Date] {
 				lastTime[record.Date] = record.Timestamp
 				if record.From == args[0] {
-					countTotal[record.Date] = strconv.FormatFloat(record.FromBalance, 'E', -1, 64)
+					countTotal[record.Date] = strconv.FormatFloat(record.FromBalance, 'f', 2, 64)
 				} else {
-					countTotal[record.Date] = strconv.FormatFloat(record.ToBalance, 'E', -1, 64)
+					countTotal[record.Date] = strconv.FormatFloat(record.ToBalance, 'f', 2, 64)
 				}
 			}
 		} else {
 			countDays.PushBack(record.Date)
 			lastTime[record.Date] = record.Timestamp
 			if record.From == args[0] {
-				countTotal[record.Date] = strconv.FormatFloat(record.FromBalance, 'E', -1, 64)
+				countTotal[record.Date] = strconv.FormatFloat(record.FromBalance, 'f', 2, 64)
 			} else {
-				countTotal[record.Date] = strconv.FormatFloat(record.ToBalance, 'E', -1, 64)
+				countTotal[record.Date] = strconv.FormatFloat(record.ToBalance, 'f', 2, 64)
 			}
 		}
 	}
@@ -377,41 +389,11 @@ func (s *SmartContract) inAndOut(APIstub shim.ChaincodeStubInterface, args []str
 }
 
 /*
- *  更新账户信息表中余额，当前流程为：在account表中修改余额
- */
-func (s *SmartContract) updateBalance(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-	fmt.Println("Update Balance Start")
-	if len(args) != 2 {
-		return shim.Error("Update Balance Failed: Incorrect number of arguments. Expecting 2")
-	}
-
-	accountAsBytes, queryErr := APIstub.GetState(args[0])
-	if queryErr != nil {
-		fmt.Println("Update Balance Failed:" + queryErr.Error())
-		return shim.Error(queryErr.Error())
-	}
-	account := Account{}
-	json.Unmarshal(accountAsBytes, &account)
-	account.Balance, _ = strconv.ParseFloat(args[1], 32)
-	fmt.Println("Update Balance:", args[1])
-	accountAsBytes, _ = json.Marshal(account)
-
-	err := APIstub.PutState(args[0], accountAsBytes)
-	if err != nil {
-		fmt.Println("Update Balance Failed:" + err.Error())
-		return shim.Error(err.Error())
-	}
-
-	fmt.Println("Update Balance End")
-	return shim.Success(nil)
-}
-
-/*
  *  新增交易记录，当前流程为：在交易记录表增加一条记录
  */
-func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [8]string) sc.Response {
-	if len(args) != 8 {
-		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 8")
+func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [9]string) sc.Response {
+	if len(args) != 9 {
+		return shim.Error("Add Record Failed: Incorrect number of arguments. Expecting 9")
 	}
 	l, _ := time.LoadLocation("Asia/Shanghai")
 	t := time.Now().In(l)
@@ -421,7 +403,7 @@ func (s *SmartContract) addRecord(APIstub shim.ChaincodeStubInterface, args [8]s
 	frombalance, _ := strconv.ParseFloat(args[4], 64)
 	tobalance, _ := strconv.ParseFloat(args[5], 64)
 	uuid, _ := getUUID()
-	record := Record{uuid, curTime[0:10], curTime[11:19], args[0], args[1], money, args[3], t.Unix(), frombalance, tobalance, args[6], args[7]}
+	record := Record{uuid, curTime[0:10], curTime[11:19], args[0], args[1], money, args[3], t.Unix(), frombalance, tobalance, args[6], args[7], args[8]}
 	recordAsBytes, _ := json.Marshal(record)
 	err := APIstub.PutState(uuid, recordAsBytes)
 	if err != nil {
@@ -472,7 +454,7 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 		target := i.Value.(string)
 		flow := Flow{}
 		flow.TargetId = target
-		flow.Amount = flowMap[target]
+		flow.Amount, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", flowMap[target]), 64)
 		if bArrayMemberAlreadyWritten == true {
 			buffer.WriteString(",")
 		}
@@ -485,11 +467,11 @@ func (s *SmartContract) fundFlow(APIstub shim.ChaincodeStubInterface, args []str
 }
 
 /*
- *  指定日期区间查询用户的交易记录，输入参数为转出方ID（args[0]），转入方（args[1]），开始日期（args[2]），结束日期（args[3]）
+ *  指定日期区间查询用户的交易记录，输入参数为转出方ID（args[0]），转入方（args[1]），开始日期（args[2]），结束日期（args[3]），当前用户(args[4])
  */
 func (s *SmartContract) recordByCondition(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if len(args) != 4 {
-		return shim.Error("Query Record Failed: Incorrect number of arguments. Expecting 4")
+	if len(args) != 5 {
+		return shim.Error("Query Record Failed: Incorrect number of arguments. Expecting 5")
 	}
 	l, _ := time.LoadLocation("Asia/Shanghai")
 	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", args[2], l)
@@ -512,10 +494,20 @@ func (s *SmartContract) recordByCondition(APIstub shim.ChaincodeStubInterface, a
 		if err != nil {
 			return shim.Error("Query Record Failed:" + err.Error())
 		}
+		record := Record{}
+		json.Unmarshal(queryResponse.Value, &record)
+		if record.Flag != "0" && record.From != args[4] {
+			if args[0] == "" {
+				record.From = "***"
+			} else {
+				continue
+			}
+		}
+		res, _ := json.Marshal(record)
 		if bArrayMemberAlreadyWritten == true {
 			buffer.WriteString(",")
 		}
-		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString(string(res))
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString(`]}`)
