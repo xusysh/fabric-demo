@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.example.springbootfabricdemo.config.FabricConfig;
 import com.example.springbootfabricdemo.dto.fabric.req.TxQuery;
 import com.example.springbootfabricdemo.dto.fabric.req.TxSubmit;
+import com.example.springbootfabricdemo.dto.resp.UserTxInfo;
 import com.example.springbootfabricdemo.entity.fabric.AccountInfo;
 import com.example.springbootfabricdemo.entity.fabric.TxInfo;
 import com.example.springbootfabricdemo.fabric.FabricComponent;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,7 @@ public class TxService {
         return txInfoList;
     }
 
-    public List<TxInfo> filterUser(String userId) throws Exception {
+    public List<UserTxInfo> filterUser(String userId) throws Exception {
         // todo: app用户映射到fabric用户
         String resultStr = fabricComponent.invokeQuery(
                 fabricConfig.getUserId(), "record", userId);
@@ -54,15 +56,26 @@ public class TxService {
         List<TxInfo> txInfoList = records.toJavaList(TxInfo.class);
         Map<String, List<TxInfo>> userTxInfo = txInfoList.stream().collect(Collectors.groupingBy(TxInfo::getRemark));
         //todo:merge
-        List<TxInfo> userTxInfoList = txInfoList;
-//        userTxInfo.values().stream().map(txInfos -> {
-//            if(txInfos.size() == 1) return txInfos.get(0);
-//            else {
-//                txInfos.stream().
-//            }
-//        });
-        //数组里的数两两组合比较，按照比较值更得的顺序升序排序
-        userTxInfoList.sort(Comparator.comparing(TxInfo::getTimestamp).reversed());
+        List<UserTxInfo> userTxInfoList = new ArrayList<>();
+        for (List<TxInfo> txInfos : userTxInfo.values()) {
+            TxInfo baseTxInfo = txInfos.get(0);
+            Boolean income = userId.equals(baseTxInfo.getTo());
+            if(txInfos.size() > 1) {
+                baseTxInfo.setMoney(txInfos.stream().mapToDouble(TxInfo::getMoney).sum());
+                baseTxInfo.setFromBalance(txInfos.stream().mapToDouble(TxInfo::getFromBalance).min().getAsDouble());
+                baseTxInfo.setToBalance(txInfos.stream().mapToDouble(TxInfo::getToBalance).max().getAsDouble());
+            }
+            userTxInfoList.add(new UserTxInfo(
+                    income ? "income":"outcome",
+                    baseTxInfo.getTimestamp(),
+                    baseTxInfo.getDate() + " " + baseTxInfo.getTime(),
+                    income ? baseTxInfo.getFrom():baseTxInfo.getTo(),
+                    baseTxInfo.getMoney(),
+                    income ? baseTxInfo.getToBalance():baseTxInfo.getFromBalance(),
+                    baseTxInfo.getComment()));
+
+        }
+        userTxInfoList.sort(Comparator.comparing(UserTxInfo::getTimestamp).reversed());
         return userTxInfoList;
     }
 

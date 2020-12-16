@@ -30,8 +30,10 @@ function yaml_ccp {
         ccp-template.yaml | sed -e $'s/\\\\n/\\\n        /g'
 }
 
-ORG=3
-IP=47.116.140.61
+#ORG=3
+ORG=1
+#IP=47.116.140.61
+IP=106.15.193.9
 P0PORT=7051
 P1PORT=7051
 CAPORT=7054
