@@ -15,4 +15,9 @@ public class TxQuery {
 
     String endTime;
 
+    /**
+     * 当前用户
+     */
+    String userId;
+
 }

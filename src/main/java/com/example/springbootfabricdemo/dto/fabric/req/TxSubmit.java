@@ -17,4 +17,9 @@ public class TxSubmit {
 
     String comment;
 
+    /**
+     * 0为不匿名（默认），1为匿名
+     */
+    String isAnon;
+
 }
