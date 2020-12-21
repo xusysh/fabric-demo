@@ -38,6 +38,8 @@ public class FabricComponent {
 
     Gateway gateway = null;
 
+    Network network = null;
+
     Contract contract = null;
 
     public void enrollAdmin(String userId, String passwd) throws Exception {
@@ -98,7 +100,9 @@ public class FabricComponent {
             gateway = builder.connect();
         }
         // get the network and contract
-        Network network = gateway.getNetwork(fabricConfig.getChannelName());
+        if (Objects.isNull(network)) {
+            network = gateway.getNetwork(fabricConfig.getChannelName());
+        }
         if (Objects.isNull(contract)) {
             contract = network.getContract(fabricConfig.getChaincodeName());
         }
