@@ -99,9 +99,9 @@ public class FabricComponent {
         }
         // get the network and contract
         Network network = gateway.getNetwork(fabricConfig.getChannelName());
-//        if (Objects.isNull(contract)) {
+        if (Objects.isNull(contract)) {
             contract = network.getContract(fabricConfig.getChaincodeName());
-//        }
+        }
         return contract;
     }
 
