@@ -100,12 +100,12 @@ public class FabricComponent {
             gateway = builder.connect();
         }
         // get the network and contract
-        if (Objects.isNull(network)) {
+//        if (Objects.isNull(network)) {
             network = gateway.getNetwork(fabricConfig.getChannelName());
-        }
-        if (Objects.isNull(contract)) {
+//        }
+//        if (Objects.isNull(contract)) {
             contract = network.getContract(fabricConfig.getChaincodeName());
-        }
+//        }
         return contract;
     }
 
