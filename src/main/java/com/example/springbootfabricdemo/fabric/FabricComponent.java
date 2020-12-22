@@ -15,10 +15,7 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -41,6 +38,10 @@ public class FabricComponent {
     Contract contract = null;
 
     Network network = null;
+
+    Date lastTime = new Date();
+
+    Long updateLimit = Long.valueOf(1000 * 60 * 10);
 
     public void enrollAdmin(String userId, String passwd) throws Exception {
         Wallet wallet = fabricConfig.getWallet();
@@ -95,15 +96,20 @@ public class FabricComponent {
         //todo:直接根据userId找到orgId
         String orgId = fabricConfig.getOrgName();
         // create a gateway connection
-        if (Objects.isNull(gateway)) {
+        Date now = new Date();
+        boolean update = lastTime.getTime() - now.getTime() > updateLimit;
+        if(update) {
+            lastTime = now;
+        }
+        if (Objects.isNull(gateway) || update) {
             Builder builder = this.getGatewayBuilder(userId, orgId);
             gateway = builder.connect();
         }
         // get the network and contract
-        if (Objects.isNull(network)) {
+        if (Objects.isNull(network) || update) {
             network = gateway.getNetwork(fabricConfig.getChannelName());
         }
-        if (Objects.isNull(contract)) {
+        if (Objects.isNull(contract) || update) {
             contract = network.getContract(fabricConfig.getChaincodeName());
         }
         return contract;
