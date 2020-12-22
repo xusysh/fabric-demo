@@ -40,6 +40,8 @@ public class FabricComponent {
 
     Contract contract = null;
 
+    Network network = null;
+
     public void enrollAdmin(String userId, String passwd) throws Exception {
         Wallet wallet = fabricConfig.getWallet();
         // Check to see if we've already enrolled the admin user.
@@ -98,7 +100,9 @@ public class FabricComponent {
             gateway = builder.connect();
         }
         // get the network and contract
-        Network network = gateway.getNetwork(fabricConfig.getChannelName());
+        if (Objects.isNull(network)) {
+            network = gateway.getNetwork(fabricConfig.getChannelName());
+        }
         if (Objects.isNull(contract)) {
             contract = network.getContract(fabricConfig.getChaincodeName());
         }
