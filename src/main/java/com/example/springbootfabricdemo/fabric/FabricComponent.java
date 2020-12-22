@@ -100,6 +100,7 @@ public class FabricComponent {
         boolean update = lastTime.getTime() - now.getTime() > updateLimit;
         if(update) {
             lastTime = now;
+            gateway.close();
         }
         if (Objects.isNull(gateway) || update) {
             Builder builder = this.getGatewayBuilder(userId, orgId);
